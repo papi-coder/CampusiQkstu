@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusIQ Admin — KsTU | Powered by Papi</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#3b82f6;--cyan:#06b6d4;--purple:#8b5cf6;
+  --gold:#f59e0b;--green:#10b981;--red:#ef4444;
+  --t1:#f0f4ff;--t2:#94a3b8;--t3:#475569;
+}
+html,body{font-family:'Exo 2',sans-serif;background:#0a0a0f;color:#f0f4ff;min-height:100vh;height:100%}
+body{display:flex;flex-direction:column}
+
+/* ADMIN LOGIN */
+#admin-login{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.97);display:flex;align-items:center;justify-content:center;padding:1rem}
+.al-box{background:#0d1117;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:2rem;width:100%;max-width:380px}
+.al-logo{text-align:center;margin-bottom:1.5rem}
+.al-logo .lt{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.al-logo .ls{font-size:0.68rem;color:#cbd5e1;letter-spacing:0.2em;margin-top:2px}
+.al-fi{width:100%;background:#111827;border:1px solid rgba(148,163,184,0.25);color:#f8fafc;padding:0.65rem 1rem;border-radius:10px;font-family:'Exo 2',sans-serif;font-size:0.85rem;outline:none;margin-bottom:0.75rem;transition:border-color 0.2s}
+.al-fi:focus{border-color:#ef4444}
+.al-fi::placeholder{color:#475569}
+.al-btn{width:100%;padding:0.7rem;background:#b91c1c;border:none;color:#fff;border-radius:10px;font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer}
+.al-btn:hover{opacity:0.88}
+.al-err{color:#fca5a5;font-size:0.75rem;text-align:center;margin-top:0.5rem;min-height:1rem}
+.al-hint{margin-top:0.875rem;padding:0.65rem;background:#111827;border:1px solid rgba(239,68,68,0.35);border-radius:8px;font-size:0.72rem;color:#e2e8f0;line-height:1.8;text-align:center}
+.al-hint strong{color:#fca5a5}
+
+/* TOP BAR */
+.topbar{height:50px;background:rgba(10,10,15,0.95);border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;padding:0 1rem;gap:0.75rem;position:sticky;top:0;z-index:50;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.tb-logo{font-family:'Orbitron',sans-serif;font-size:0.9rem;font-weight:700;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
+.tb-tag{font-size:0.6rem;color:#cbd5e1;letter-spacing:0.15em;white-space:nowrap}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:0.75rem;font-size:0.75rem;color:#e2e8f0}
+.online-dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.tb-logout{padding:0.25rem 0.65rem;border-radius:20px;font-size:0.7rem;border:1px solid rgba(248,113,113,0.35);background:#b91c1c;color:#fff;cursor:pointer;font-family:'Exo 2',sans-serif}
+.tb-logout:hover{background:#991b1b}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;min-height:0;height:calc(100vh - 50px)}
+.sidebar{width:200px;background:rgba(13,17,23,0.8);border-right:1px solid rgba(255,255,255,0.06);padding:0.75rem 0;flex-shrink:0;display:flex;flex-direction:column;gap:0.1rem;overflow-y:auto}
+@media(max-width:640px){.sidebar{width:48px}.sb-label{display:none}}
+.sb-item{display:flex;align-items:center;gap:0.6rem;padding:0.52rem 0.875rem;cursor:pointer;transition:all 0.18s;color:#cbd5e1;border-left:2px solid transparent;width:100%;background:none;border:none;text-align:left;font:inherit;font-size:0.78rem}
+.sb-item:hover{background:#111827;color:#fff}
+.sb-item.active{background:#1f2937;color:#fff;border-left-color:#ef4444}
+.sb-icon{font-size:0.95rem;flex-shrink:0;width:18px;text-align:center}
+.sb-section{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.12em;padding:0.65rem 0.875rem 0.2rem;font-weight:600}
+.sb-badge{margin-left:auto;background:#b91c1c;color:#fff;border:1px solid rgba(248,113,113,0.35);border-radius:20px;font-size:0.58rem;padding:0.1rem 0.4rem;font-weight:600}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:1.25rem;background:linear-gradient(135deg,#0a0a0f 0%,#0d1117 100%)}
+.page{display:none;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1.1rem;color:#f0f4ff}
+
+/* CARDS */
+.gc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:1rem;transition:border-color 0.2s;font:inherit;text-align:left}
+.gc:hover{border-color:rgba(255,255,255,0.13)}
+.gc.blue{border-color:rgba(59,130,246,0.25);background:rgba(59,130,246,0.06)}
+.gc.green{border-color:rgba(16,185,129,0.25);background:rgba(16,185,129,0.06)}
+.gc.red{border-color:rgba(239,68,68,0.25);background:rgba(239,68,68,0.06)}
+.gc.gold{border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.06)}
+.gc.purple{border-color:rgba(139,92,246,0.25);background:rgba(139,92,246,0.06)}
+.gc.cyan{border-color:rgba(6,182,212,0.25);background:rgba(6,182,212,0.06)}
+
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0.875rem}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.875rem}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem}
+
+.sh{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.875rem}
+.sh h2{font-family:'Orbitron',sans-serif;font-size:0.88rem;font-weight:600;white-space:nowrap}
+.sh-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0.08),transparent)}
+
+.badge{display:inline-block;padding:0.15rem 0.5rem;border-radius:20px;font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+.bb{background:#1d4ed8;color:#fff;border:1px solid rgba(147,197,253,0.4)}
+.bg{background:#047857;color:#fff;border:1px solid rgba(110,231,183,0.4)}
+.bgo{background:#a16207;color:#fff;border:1px solid rgba(253,230,138,0.4)}
+.br{background:#b91c1c;color:#fff;border:1px solid rgba(252,165,165,0.4)}
+.bp{background:#6d28d9;color:#fff;border:1px solid rgba(221,214,254,0.4)}
+
+.stat-val{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:700}
+.prog-bar{height:5px;background:#1e293b;border-radius:3px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;border-radius:3px}
+
+.btn{padding:0.42rem 0.95rem;border-radius:20px;cursor:pointer;font-family:'Exo 2',sans-serif;font-size:0.76rem;font-weight:500;border:none;transition:all 0.18s}
+.btn-p{background:#b91c1c;color:#fff}
+.btn-p:hover{opacity:0.85}
+.btn-o{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#94a3b8}
+.btn-o:hover{border-color:#3b82f6;color:#60c8ff}
+.btn-r{background:#991b1b;border:1px solid rgba(248,113,113,0.35);color:#fff}
+.btn-r:hover{background:#7f1d1d}
+.btn-g{background:#047857;border:1px solid rgba(110,231,183,0.4);color:#fff}
+.btn-b{background:#1d4ed8;border:1px solid rgba(147,197,253,0.4);color:#fff}
+
+.tbl{width:100%;border-collapse:collapse;font-size:0.74rem}
+.tbl th{padding:0.48rem 0.62rem;text-align:left;color:#94a3b8;font-weight:500;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid rgba(255,255,255,0.07);white-space:nowrap}
+.tbl td{padding:0.52rem 0.62rem;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+.tbl tr:hover td{background:rgba(255,255,255,0.02)}
+
+.fi{background:#111827;border:1px solid rgba(148,163,184,0.25);color:#f8fafc;padding:0.5rem 0.875rem;border-radius:10px;font-family:'Exo 2',sans-serif;font-size:0.8rem;outline:none;transition:border-color 0.2s;width:100%}
+.fi:focus{border-color:#3b82f6}
+.fi::placeholder{color:#475569}
+select.fi option{background:#0d1117;color:#f0f4ff}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
+.modal-bg.open{display:flex}
+.modal{background:#0d1117;border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:1.5rem;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;animation:fadeIn 0.25s ease}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:0.95rem;font-weight:600;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;color:#94a3b8;font-size:1.2rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:#f0f4ff}
+.form-row{margin-bottom:0.875rem}
+.form-label{font-size:0.72rem;color:#94a3b8;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em}
+.form-err{color:#fca5a5;font-size:0.75rem;margin-top:0.5rem;min-height:1rem;text-align:center}
+.form-success{color:#f8fafc;font-size:0.8rem;margin-top:0.5rem;text-align:center;padding:0.5rem;background:#047857;border-radius:8px;border:1px solid rgba(110,231,183,0.35)}
+
+/* TOGGLE */
+.toggle{position:relative;width:36px;height:20px;background:#1e293b;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:rgba(16,185,129,0.4);border-color:#10b981}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#475569;transition:all 0.2s}
+.toggle.on::after{background:#10b981;left:18px}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px}
+
+.pw-reveal{position:relative}
+.pw-reveal .fi{padding-right:2.5rem}
+.pw-eye{position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#475569;cursor:pointer;font-size:0.9rem}
+.copy-btn{padding:0.2rem 0.55rem;background:#1d4ed8;border:1px solid rgba(147,197,253,0.4);color:#fff;border-radius:8px;font-size:0.65rem;cursor:pointer;font-family:'Exo 2',sans-serif}
+.copy-btn:hover{background:#1e40af}
+</style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div id="admin-login">
+  <div class="al-box">
+    <div class="al-logo">
+      <div data-style="font-size:1.75rem;margin-bottom:0.4rem">🛡</div>
+      <div class="lt">Admin Portal</div>
+      <div class="ls">CampusIQ · KsTU Backend · Powered by Papi</div>
+    </div>
+    <input class="al-fi" id="a-user" placeholder="Admin Username" autocomplete="off">
+    <input class="al-fi" id="a-pw" type="password" placeholder="Admin Password" onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="al-btn" onclick="adminLogin()">Access Backend</button>
+    <div class="al-err" id="a-err"></div>
+    <div class="al-hint">
+      Default: <strong>admin</strong> / <strong>admin123</strong><br>
+      Change password in Settings after first login.
+    </div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar" id="main-topbar" data-style="display:none">
+  <div data-style="font-size:1.1rem">🛡</div>
+  <div class="tb-logo">CampusIQ Admin</div>
+  <div class="tb-tag">KsTU Backend · Powered by Papi</div>
+  <div class="tb-right">
+    <span class="online-dot"></span> System Online &nbsp;|&nbsp;
+    <span id="user-count-top" data-style="color:#34d399"></span> &nbsp;|&nbsp;
+    <span data-style="color:#fcd34d">Super Admin</span>
+    <button class="tb-logout" onclick="adminLogout()">Sign Out</button>
+  </div>
+</div>
+
+<div class="layout" id="main-layout" data-style="display:none">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-section sb-label">Overview</div>
+  <button type="button" class="sb-item active" onclick="go('dash',this)"><span class="sb-icon">📊</span><span class="sb-label">Dashboard</span></button>
+  <button type="button" class="sb-item" onclick="go('alerts',this)"><span class="sb-icon">🔔</span><span class="sb-label">Alerts</span><span class="sb-badge">4</span></button>
+
+  <div class="sb-section sb-label">Accounts</div>
+  <button type="button" class="sb-item" onclick="go('students',this)"><span class="sb-icon">🎓</span><span class="sb-label">Students</span></button>
+  <button type="button" class="sb-item" onclick="go('lecturers',this)"><span class="sb-icon">👨‍🏫</span><span class="sb-label">Lecturers</span></button>
+  <button type="button" class="sb-item" onclick="go('hods',this)"><span class="sb-icon">🏛</span><span class="sb-label">HODs</span></button>
+
+  <div class="sb-section sb-label">Academic</div>
+  <button type="button" class="sb-item" onclick="go('courses',this)"><span class="sb-icon">📚</span><span class="sb-label">Courses</span></button>
+  <button type="button" class="sb-item" onclick="go('exams',this)"><span class="sb-icon">📝</span><span class="sb-label">Exams</span></button>
+  <button type="button" class="sb-item" onclick="go('results',this)"><span class="sb-icon">🏆</span><span class="sb-label">Results</span></button>
+  <button type="button" class="sb-item" onclick="go('timetable',this)"><span class="sb-icon">📅</span><span class="sb-label">Timetable</span></button>
+
+  <div class="sb-section sb-label">Campus</div>
+  <button type="button" class="sb-item" onclick="go('fees',this)"><span class="sb-icon">💰</span><span class="sb-label">Fees & Finance</span></button>
+  <button type="button" class="sb-item" onclick="go('hostels',this)"><span class="sb-icon">🏠</span><span class="sb-label">Hostels</span></button>
+
+  <div class="sb-section sb-label">System</div>
+  <button type="button" class="sb-item" onclick="go('papi',this)"><span class="sb-icon">🤖</span><span class="sb-label">Papi AI Config</span></button>
+  <button type="button" class="sb-item" onclick="go('logs',this)"><span class="sb-icon">🗒</span><span class="sb-label">System Logs</span></button>
+  <button type="button" class="sb-item" onclick="go('settings',this)"><span class="sb-icon">⚙️</span><span class="sb-label">Settings</span></button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dash">
+  <div class="page-title">System Dashboard</div>
+  <div class="g4" data-style="margin-bottom:1.1rem">
+    <button type="button" class="gc blue" data-style="text-align:center;cursor:pointer" onclick="go('students',document.querySelectorAll('.sb-item')[3])">
+      <div class="stat-val" data-style="color:#60c8ff" id="dash-students">0</div>
+      <div data-style="font-size:0.67rem;color:#94a3b8;margin-top:4px;text-transform:uppercase">Students</div>
+    </button>
+    <button type="button" class="gc green" data-style="text-align:center;cursor:pointer" onclick="go('lecturers',document.querySelectorAll('.sb-item')[4])">
+      <div class="stat-val" data-style="color:#34d399" id="dash-lecturers">0</div>
+      <div data-style="font-size:0.67rem;color:#94a3b8;margin-top:4px;text-transform:uppercase">Lecturers</div>
+    </button>
+    <button type="button" class="gc gold" data-style="text-align:center;cursor:pointer" onclick="go('hods',document.querySelectorAll('.sb-item')[5])">
+      <div class="stat-val" data-style="color:#fcd34d" id="dash-hods">0</div>
+      <div data-style="font-size:0.67rem;color:#94a3b8;margin-top:4px;text-transform:uppercase">HODs</div>
+    </button>
+    <button type="button" class="gc purple" data-style="text-align:center">
+      <div class="stat-val" data-style="color:#c4b5fd" id="dash-total">0</div>
+      <div data-style="font-size:0.67rem;color:#94a3b8;margin-top:4px;text-transform:uppercase">Total Accounts</div>
+    </button>
+  </div>
+
+  <!-- QUICK CREATE -->
+  <div class="sh"><h2>Quick Account Creation</h2><div class="sh-line"></div></div>
+  <div class="g3" data-style="margin-bottom:1.25rem">
+    <button type="button" class="gc blue" data-style="text-align:center;cursor:pointer;padding:1.25rem" onclick="openModal('student')">
+      <div data-style="font-size:2rem">🎓</div>
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin:0.5rem 0 0.25rem">Add Student</div>
+      <div data-style="font-size:0.75rem;color:#94a3b8">Create student login account</div>
+    </button>
+    <button type="button" class="gc green" data-style="text-align:center;cursor:pointer;padding:1.25rem" onclick="openModal('lecturer')">
+      <div data-style="font-size:2rem">👨‍🏫</div>
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin:0.5rem 0 0.25rem">Add Lecturer</div>
+      <div data-style="font-size:0.75rem;color:#94a3b8">Create lecturer login account</div>
+    </button>
+    <button type="button" class="gc gold" data-style="text-align:center;cursor:pointer;padding:1.25rem" onclick="openModal('hod')">
+      <div data-style="font-size:2rem">🏛</div>
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin:0.5rem 0 0.25rem">Add HOD</div>
+      <div data-style="font-size:0.75rem;color:#94a3b8">Create HOD login account</div>
+    </button>
+  </div>
+
+  <!-- RECENT ACCOUNTS -->
+  <div class="sh"><h2>Recently Created Accounts</h2><div class="sh-line"></div></div>
+  <div class="gc" data-style="padding:0.5rem">
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Dept/Programme</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="recent-accounts"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STUDENTS PAGE -->
+<div class="page" id="page-students">
+  <div data-style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;gap:0.5rem">
+    <div class="page-title" data-style="margin-bottom:0">Student Accounts</div>
+    <button class="btn btn-p" onclick="openModal('student')">+ Add Student</button>
+  </div>
+  <div data-style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+    <input class="fi" id="search-students" placeholder="Search by name or email…" data-style="flex:1;min-width:160px" oninput="renderStudents()">
+    <select class="fi" id="filter-dept" data-style="width:180px" onchange="renderStudents()">
+      <option value="">All Departments</option>
+      <option>Applied Sciences</option><option>Engineering</option><option>Business School</option>
+      <option>Built Environment</option><option>Creative Arts</option><option>Health Sciences</option><option>Entrepreneurship</option>
+    </select>
+  </div>
+  <div class="gc" data-style="padding:0.5rem;margin-bottom:0.875rem">
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Email</th><th>Programme</th><th>Department</th><th>Student ID</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="students-tbody"></tbody>
+    </table>
+  </div>
+  <div data-style="font-size:0.72rem;color:#475569" id="students-count"></div>
+</div>
+
+<!-- LECTURERS PAGE -->
+<div class="page" id="page-lecturers">
+  <div data-style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;gap:0.5rem">
+    <div class="page-title" data-style="margin-bottom:0">Lecturer Accounts</div>
+    <button class="btn btn-p" onclick="openModal('lecturer')">+ Add Lecturer</button>
+  </div>
+  <div data-style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+    <input class="fi" id="search-lecturers" placeholder="Search by name or email…" data-style="flex:1;min-width:160px" oninput="renderLecturers()">
+  </div>
+  <div class="gc" data-style="padding:0.5rem;margin-bottom:0.875rem">
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Email</th><th>Title</th><th>Department</th><th>Staff ID</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="lecturers-tbody"></tbody>
+    </table>
+  </div>
+  <div data-style="font-size:0.72rem;color:#475569" id="lecturers-count"></div>
+</div>
+
+<!-- HODs PAGE -->
+<div class="page" id="page-hods">
+  <div data-style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap;gap:0.5rem">
+    <div class="page-title" data-style="margin-bottom:0">HOD Accounts</div>
+    <button class="btn btn-p" onclick="openModal('hod')">+ Add HOD</button>
+  </div>
+  <div class="gc" data-style="padding:0.5rem;margin-bottom:0.875rem">
+    <table class="tbl">
+      <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Staff ID</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody id="hods-tbody"></tbody>
+    </table>
+  </div>
+  <div data-style="font-size:0.72rem;color:#475569" id="hods-count"></div>
+</div>
+
+<!-- COURSES -->
+<div class="page" id="page-courses">
+  <div class="page-title">Course Management</div>
+  <div class="gc" data-style="padding:0.5rem">
+    <table class="tbl">
+      <thead><tr><th>Code</th><th>Course Name</th><th>Faculty</th><th>Credits</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td data-style="font-family:monospace;color:#60c8ff">CPT 301</td><td>Data Structures & Algorithms</td><td>Applied Sciences</td><td>3</td><td><span class="badge bg">Active</span></td></tr>
+        <tr><td data-style="font-family:monospace;color:#60c8ff">CPT 305</td><td>AI & Machine Learning</td><td>Applied Sciences</td><td>3</td><td><span class="badge bg">Active</span></td></tr>
+        <tr><td data-style="font-family:monospace;color:#60c8ff">MAT 201</td><td>Calculus II</td><td>Applied Sciences</td><td>3</td><td><span class="badge bg">Active</span></td></tr>
+        <tr><td data-style="font-family:monospace;color:#60c8ff">EEE 301</td><td>Power Systems Engineering</td><td>Engineering</td><td>3</td><td><span class="badge bg">Active</span></td></tr>
+        <tr><td data-style="font-family:monospace;color:#60c8ff">FIN 201</td><td>Commercial Banking</td><td>Business School</td><td>3</td><td><span class="badge bg">Active</span></td></tr>
+        <tr><td data-style="font-family:monospace;color:#60c8ff">BLD 301</td><td>Structural Systems</td><td>Built Environment</td><td>3</td><td><span class="badge bgo">Review</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EXAMS -->
+<div class="page" id="page-exams">
+  <div class="page-title">Exam Management</div>
+  <div class="g2" data-style="margin-bottom:1rem">
+    <div class="gc blue"><div data-style="font-size:0.68rem;color:#93c5fd;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em">Next Exam Block</div><div data-style="font-family:'Orbitron',sans-serif;font-size:1.05rem;color:#60c8ff">July 14 – Aug 2, 2026</div><div data-style="font-size:0.76rem;color:#94a3b8;margin-top:4px">47 papers scheduled</div></div>
+    <div class="gc gold"><div data-style="font-size:0.68rem;color:#fcd34d;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em">Timetable Status</div><div data-style="font-family:'Orbitron',sans-serif;font-size:1.05rem;color:#fcd34d">1 Conflict</div><div data-style="font-size:0.76rem;color:#94a3b8;margin-top:4px">CPT 301 vs EEE 301 — Needs resolution</div></div>
+  </div>
+  <div class="gc" data-style="padding:0.5rem">
+    <table class="tbl">
+      <thead><tr><th>Date</th><th>Time</th><th>Course</th><th>Venue</th><th>Students</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Jul 14</td><td>8:00 AM</td><td>CPT 301 Data Structures</td><td>Main Hall A</td><td>32</td><td><span class="badge bg">Confirmed</span></td></tr>
+        <tr><td>Jul 14</td><td>8:00 AM</td><td>EEE 301 Power Systems</td><td>Main Hall A</td><td>28</td><td><span class="badge br">Conflict!</span></td></tr>
+        <tr><td>Jul 15</td><td>10:00 AM</td><td>MAT 201 Calculus II</td><td>Hall B</td><td>97</td><td><span class="badge bg">Confirmed</span></td></tr>
+        <tr><td>Jul 16</td><td>8:00 AM</td><td>CPT 305 AI & ML</td><td>Lab A-205</td><td>28</td><td><span class="badge bg">Confirmed</span></td></tr>
+        <tr><td>Jul 17</td><td>2:00 PM</td><td>FIN 201 Commercial Banking</td><td>Hall C</td><td>44</td><td><span class="badge bgo">Pending</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="page" id="page-results">
+  <div class="page-title">Results & Grading</div>
+  <div class="g4" data-style="margin-bottom:1rem">
+    <div class="gc green" data-style="text-align:center"><div class="stat-val" data-style="color:#34d399;font-size:1.2rem">1,891</div><div data-style="font-size:0.67rem;color:#94a3b8">Pass</div></div>
+    <div class="gc red" data-style="text-align:center"><div class="stat-val" data-style="color:#fca5a5;font-size:1.2rem">134</div><div data-style="font-size:0.67rem;color:#94a3b8">At Risk</div></div>
+    <div class="gc gold" data-style="text-align:center"><div class="stat-val" data-style="color:#fcd34d;font-size:1.2rem">289</div><div data-style="font-size:0.67rem;color:#94a3b8">Pending</div></div>
+    <div class="gc purple" data-style="text-align:center"><div class="stat-val" data-style="color:#c4b5fd;font-size:1.2rem">3.58</div><div data-style="font-size:0.67rem;color:#94a3b8">Avg GPA</div></div>
+  </div>
+  <div class="gc" data-style="padding:0.5rem">
+    <div class="sh"><h2>Grade Distribution</h2><div class="sh-line"></div></div>
+    <svg viewBox="0 0 400 100" data-style="width:100%">
+      <rect x="10" y="20" width="60" height="60" rx="4" fill="rgba(16,185,129,0.3)" stroke="#10b981" stroke-width="1"/><text x="40" y="55" text-anchor="middle" fill="#34d399" font-size="14" font-family="Orbitron" font-weight="600">A</text><text x="40" y="90" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Exo 2">28%</text>
+      <rect x="85" y="30" width="60" height="50" rx="4" fill="rgba(59,130,246,0.3)" stroke="#3b82f6" stroke-width="1"/><text x="115" y="60" text-anchor="middle" fill="#60c8ff" font-size="14" font-family="Orbitron" font-weight="600">B</text><text x="115" y="90" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Exo 2">34%</text>
+      <rect x="160" y="40" width="60" height="40" rx="4" fill="rgba(6,182,212,0.3)" stroke="#06b6d4" stroke-width="1"/><text x="190" y="65" text-anchor="middle" fill="#22d3ee" font-size="14" font-family="Orbitron" font-weight="600">C</text><text x="190" y="90" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Exo 2">21%</text>
+      <rect x="235" y="55" width="60" height="25" rx="4" fill="rgba(245,158,11,0.3)" stroke="#f59e0b" stroke-width="1"/><text x="265" y="73" text-anchor="middle" fill="#fcd34d" font-size="12" font-family="Orbitron" font-weight="600">D</text><text x="265" y="90" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Exo 2">10%</text>
+      <rect x="310" y="65" width="60" height="15" rx="4" fill="rgba(239,68,68,0.3)" stroke="#ef4444" stroke-width="1"/><text x="340" y="78" text-anchor="middle" fill="#fca5a5" font-size="10" font-family="Orbitron" font-weight="600">F</text><text x="340" y="90" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Exo 2">7%</text>
+    </svg>
+  </div>
+</div>
+
+<!-- TIMETABLE -->
+<div class="page" id="page-timetable">
+  <div class="page-title">University Timetable</div>
+  <div class="gc" data-style="padding:0.5rem">
+    <table class="tbl">
+      <thead><tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr></thead>
+      <tbody>
+        <tr><td data-style="color:#94a3b8;white-space:nowrap">7:30–9:30</td><td><div data-style="background:rgba(59,130,246,0.15);padding:3px 5px;border-radius:5px;font-size:0.67rem;border-left:2px solid #3b82f6">CPT 301<br><span data-style="color:#94a3b8">Lab A-201</span></div></td><td></td><td><div data-style="background:rgba(245,158,11,0.15);padding:3px 5px;border-radius:5px;font-size:0.67rem;border-left:2px solid #f59e0b">MAT 201<br><span data-style="color:#94a3b8">B-104</span></div></td><td></td><td></td></tr>
+        <tr><td data-style="color:#94a3b8;white-space:nowrap">8:00–10:00</td><td></td><td><div data-style="background:rgba(16,185,129,0.15);padding:3px 5px;border-radius:5px;font-size:0.67rem;border-left:2px solid #10b981">ENG 201<br><span data-style="color:#94a3b8">C-103</span></div></td><td></td><td></td><td><div data-style="background:rgba(16,185,129,0.15);padding:3px 5px;border-radius:5px;font-size:0.67rem;border-left:2px solid #10b981">ENG 201<br><span data-style="color:#94a3b8">C-103</span></div></td></tr>
+        <tr><td data-style="color:#94a3b8;white-space:nowrap">14:00–16:00</td><td><div data-style="background:rgba(139,92,246,0.15);padding:3px 5px;border-radius:5px;font-size:0.67rem;border-left:2px solid #8b5cf6">CPT 305<br><span data-style="color:#94a3b8">Lab A-205</span></div></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FEES -->
+<div class="page" id="page-fees">
+  <div class="page-title">Fees & Finance</div>
+  <div class="g4" data-style="margin-bottom:1rem">
+    <div class="gc green" data-style="text-align:center"><div class="stat-val" data-style="color:#34d399;font-size:1.25rem">GHS 6.1M</div><div data-style="font-size:0.67rem;color:#94a3b8">Collected</div></div>
+    <div class="gc red" data-style="text-align:center"><div class="stat-val" data-style="color:#fca5a5;font-size:1.25rem">GHS 2.1M</div><div data-style="font-size:0.67rem;color:#94a3b8">Outstanding</div></div>
+    <div class="gc gold" data-style="text-align:center"><div class="stat-val" data-style="color:#fcd34d;font-size:1.25rem">150</div><div data-style="font-size:0.67rem;color:#94a3b8">Defaulters</div></div>
+    <div class="gc blue" data-style="text-align:center"><div class="stat-val" data-style="color:#60c8ff;font-size:1.25rem">74%</div><div data-style="font-size:0.67rem;color:#94a3b8">Collection Rate</div></div>
+  </div>
+  <div class="gc" data-style="padding:0.5rem">
+    <div class="sh"><h2>Outstanding Fees</h2><div class="sh-line"></div><button class="btn btn-o" data-style="font-size:0.68rem;padding:0.28rem 0.65rem">Send Reminders</button></div>
+    <table class="tbl"><thead><tr><th>Student</th><th>Faculty</th><th>Amount Owed</th><th>Last Payment</th><th>Action</th></tr></thead><tbody>
+      <tr><td>Kwaku Asante</td><td>Engineering</td><td data-style="color:#fca5a5">GHS 1,800</td><td>Apr 2026</td><td><button class="btn btn-r" data-style="font-size:0.63rem;padding:0.18rem 0.45rem">Remind</button></td></tr>
+      <tr><td>Abena Owusu</td><td>Business</td><td data-style="color:#fca5a5">GHS 2,400</td><td>Mar 2026</td><td><button class="btn btn-r" data-style="font-size:0.63rem;padding:0.18rem 0.45rem">Remind</button></td></tr>
+      <tr><td>Yaw Darko</td><td>Applied Sci</td><td data-style="color:#fcd34d">GHS 950</td><td>May 2026</td><td><button class="btn btn-r" data-style="font-size:0.63rem;padding:0.18rem 0.45rem">Remind</button></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- HOSTELS -->
+<div class="page" id="page-hostels">
+  <div class="page-title">Hostel Management</div>
+  <div class="g3" data-style="margin-bottom:1rem">
+    <div class="gc green" data-style="text-align:center"><div class="stat-val" data-style="color:#34d399;font-size:1.2rem">847</div><div data-style="font-size:0.67rem;color:#94a3b8">Occupied</div></div>
+    <div class="gc blue" data-style="text-align:center"><div class="stat-val" data-style="color:#60c8ff;font-size:1.2rem">153</div><div data-style="font-size:0.67rem;color:#94a3b8">Available</div></div>
+    <div class="gc gold" data-style="text-align:center"><div class="stat-val" data-style="color:#fcd34d;font-size:1.2rem">85%</div><div data-style="font-size:0.67rem;color:#94a3b8">Occupancy</div></div>
+  </div>
+  <div class="g2">
+    <div class="gc">
+      <div class="sh"><h2>Blocks</h2><div class="sh-line"></div></div>
+      <div class="gc blue" data-style="padding:0.7rem;margin-bottom:0.5rem"><div data-style="display:flex;justify-content:space-between;align-items:center"><div><div data-style="font-weight:500;font-size:0.83rem">Volta Hall (Block A)</div><div data-style="font-size:0.72rem;color:#94a3b8">Mixed · 2–4 per room · GHS 800/sem</div></div><span class="badge bg">82%</span></div><div class="prog-bar" data-style="margin-top:0.5rem"><div class="prog-fill" data-style="width:82%;background:#10b981"></div></div></div>
+      <div class="gc" data-style="padding:0.7rem;margin-bottom:0.5rem"><div data-style="display:flex;justify-content:space-between;align-items:center"><div><div data-style="font-weight:500;font-size:0.83rem">Pra Hall (Block B)</div><div data-style="font-size:0.72rem;color:#94a3b8">Male · 2 per room · GHS 950/sem</div></div><span class="badge br">100%</span></div><div class="prog-bar" data-style="margin-top:0.5rem"><div class="prog-fill" data-style="width:100%;background:#ef4444"></div></div></div>
+      <div class="gc" data-style="padding:0.7rem"><div data-style="display:flex;justify-content:space-between;align-items:center"><div><div data-style="font-weight:500;font-size:0.83rem">Komfo Hall (Block C)</div><div data-style="font-size:0.72rem;color:#94a3b8">Female · 4 per room · GHS 650/sem</div></div><span class="badge bgo">71%</span></div><div class="prog-bar" data-style="margin-top:0.5rem"><div class="prog-fill" data-style="width:71%;background:#f59e0b"></div></div></div>
+    </div>
+    <div class="gc"><div class="sh"><h2>Pending Applications</h2><div class="sh-line"></div></div>
+      <table class="tbl"><thead><tr><th>Student</th><th>Block</th><th>Date</th><th>Action</th></tr></thead><tbody>
+        <tr><td>Kofi Mensah</td><td>Block A</td><td>Jun 10</td><td><button class="btn btn-g" data-style="font-size:0.6rem;padding:0.18rem 0.45rem">Approve</button></td></tr>
+        <tr><td>Abena Asante</td><td>Block C</td><td>Jun 11</td><td><button class="btn btn-g" data-style="font-size:0.6rem;padding:0.18rem 0.45rem">Approve</button></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- PAPI AI CONFIG -->
+<div class="page" id="page-papi">
+  <div class="page-title">Papi AI Configuration</div>
+  <div class="g2" data-style="margin-bottom:1rem">
+    <div class="gc blue">
+      <div data-style="font-size:1.4rem;margin-bottom:0.5rem">🤖</div>
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.88rem;margin-bottom:0.3rem">Papi AI Core</div>
+      <div data-style="font-size:0.76rem;color:#94a3b8;margin-bottom:0.875rem">Powered by Groq (Free) · llama3-8b-8192</div>
+      <div data-style="display:flex;flex-direction:column;gap:0.6rem">
+        <div data-style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem"><span>AI Tutor</span><button type="button" class="toggle on" aria-label="Toggle AI Tutor" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem"><span>CV Builder</span><button type="button" class="toggle on" aria-label="Toggle CV Builder" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem"><span>Past Q Solver</span><button type="button" class="toggle on" aria-label="Toggle Past Q Solver" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem"><span>Smart Notifications</span><button type="button" class="toggle" aria-label="Toggle Smart Notifications" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+    <div class="gc gold">
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin-bottom:0.75rem">🔑 Groq API Key (Global)</div>
+      <div data-style="font-size:0.78rem;color:#94a3b8;margin-bottom:0.75rem">Set a global Groq key here. Students can also set their own key in the app. Get free key at <strong data-style="color:#fcd34d">console.groq.com</strong></div>
+      <div class="form-row">
+        <div class="pw-reveal">
+          <input class="fi" id="admin-groq-key" type="password" placeholder="gsk_..." data-style="padding-right:2.5rem">
+          <button class="pw-eye" onclick="togglePw('admin-groq-key',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn btn-p" onclick="saveAdminGroqKey()" data-style="width:100%">Save Groq Key</button>
+      <div id="groq-save-msg" data-style="min-height:1.2rem;margin-top:0.5rem;font-size:0.75rem;text-align:center;color:#34d399"></div>
+    </div>
+  </div>
+  <div class="gc purple">
+    <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin-bottom:0.75rem">System Prompt</div>
+    <textarea class="fi" data-style="height:100px;resize:vertical">You are Papi, the official AI assistant for Kumasi Technical University (KsTU). Help students with academics, career guidance, and campus life. Be concise, encouraging, and use Ghanaian context where relevant.</textarea>
+    <div data-style="margin-top:0.75rem;display:flex;gap:0.5rem"><button class="btn btn-p">Save Prompt</button><button class="btn btn-o">Reset Default</button></div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="page" id="page-alerts">
+  <div class="page-title">System Alerts</div>
+  <div data-style="display:flex;flex-direction:column;gap:0.65rem">
+    <div class="gc red" data-style="padding:0.8rem"><div data-style="display:flex;align-items:flex-start;gap:0.65rem"><span data-style="font-size:1.1rem">🚨</span><div data-style="flex:1"><div data-style="font-size:0.82rem;font-weight:500">134 students at academic risk</div><div data-style="font-size:0.73rem;color:#94a3b8">Across 6 departments — requires intervention</div></div><button class="btn btn-o" data-style="font-size:0.66rem;padding:0.22rem 0.55rem">Review</button></div></div>
+    <div class="gc gold" data-style="padding:0.8rem"><div data-style="display:flex;align-items:flex-start;gap:0.65rem"><span data-style="font-size:1.1rem">⚡</span><div data-style="flex:1"><div data-style="font-size:0.82rem;font-weight:500">Exam timetable conflict — CPT301 vs EEE301</div><div data-style="font-size:0.73rem;color:#94a3b8">Same hall, same time on July 14</div></div><button class="btn btn-o" data-style="font-size:0.66rem;padding:0.22rem 0.55rem">Resolve</button></div></div>
+    <div class="gc blue" data-style="padding:0.8rem"><div data-style="display:flex;align-items:flex-start;gap:0.65rem"><span data-style="font-size:1.1rem">💾</span><div data-style="flex:1"><div data-style="font-size:0.82rem;font-weight:500">Server storage at 78% capacity</div><div data-style="font-size:0.73rem;color:#94a3b8">Archive 2022 academic records recommended</div></div><button class="btn btn-o" data-style="font-size:0.66rem;padding:0.22rem 0.55rem">Archive</button></div></div>
+    <div class="gc green" data-style="padding:0.8rem"><div data-style="display:flex;align-items:flex-start;gap:0.65rem"><span data-style="font-size:1.1rem">✅</span><div data-style="flex:1"><div data-style="font-size:0.82rem;font-weight:500">Q2 academic report approved</div><div data-style="font-size:0.73rem;color:#94a3b8">Report published to registrar and senate</div></div><button class="btn btn-o" data-style="font-size:0.66rem;padding:0.22rem 0.55rem">View</button></div></div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div class="page" id="page-logs">
+  <div class="page-title">System Logs</div>
+  <div class="gc" data-style="font-family:monospace;font-size:0.7rem;line-height:2;color:#475569;background:#0a0a0f;border:1px solid rgba(255,255,255,0.06)" id="log-cont"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">System Settings</div>
+  <div class="g2">
+    <div class="gc">
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin-bottom:0.875rem">General Settings</div>
+      <div data-style="display:flex;flex-direction:column;gap:0.75rem">
+        <div><label class="form-label" for="settings-university">University Name</label><input class="fi" id="settings-university" value="Kumasi Technical University (KsTU)"></div>
+        <div><label class="form-label" for="settings-year">Academic Year</label><input class="fi" id="settings-year" value="2025/2026"></div>
+        <div><label class="form-label" for="settings-semester">Current Semester</label><input class="fi" id="settings-semester" value="Semester 2"></div>
+        <div><label class="form-label" for="settings-email">Admin Email</label><input class="fi" id="settings-email" value="admin@kstu.edu.gh"></div>
+        <div><label class="form-label" for="new-admin-pw">Change Admin Password</label>
+          <div class="pw-reveal"><input class="fi" id="new-admin-pw" type="password" placeholder="New password…" data-style="padding-right:2.5rem"><button class="pw-eye" onclick="togglePw('new-admin-pw',this)">👁</button></div>
+        </div>
+        <button class="btn btn-p" onclick="saveAdminPw()">Save Settings</button>
+        <div id="settings-msg" data-style="min-height:1rem;font-size:0.75rem;color:#34d399;text-align:center"></div>
+      </div>
+    </div>
+    <div class="gc">
+      <div data-style="font-family:'Orbitron',sans-serif;font-size:0.85rem;margin-bottom:0.875rem">Feature Toggles</div>
+      <div data-style="display:flex;flex-direction:column;gap:0.65rem;font-size:0.78rem">
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>Student Portal</span><button type="button" class="toggle on" aria-label="Toggle Student Portal" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>Lecturer Portal</span><button type="button" class="toggle on" aria-label="Toggle Lecturer Portal" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>HOD Portal</span><button type="button" class="toggle on" aria-label="Toggle HOD Portal" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>Papi AI Features</span><button type="button" class="toggle on" aria-label="Toggle Papi AI Features" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>Campus Marketplace</span><button type="button" class="toggle on" aria-label="Toggle Campus Marketplace" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>Hostel Booking</span><button type="button" class="toggle on" aria-label="Toggle Hostel Booking" onclick="this.classList.toggle('on')"></button></div>
+        <div data-style="display:flex;justify-content:space-between;align-items:center"><span>Maintenance Mode</span><button type="button" class="toggle" aria-label="Toggle Maintenance Mode" onclick="this.classList.toggle('on')"></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+</div><!-- end layout -->
+
+<!-- ===== CREATE ACCOUNT MODAL ===== -->
+<div class="modal-bg" id="create-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-title-text">Create Account</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label" for="f-name">Full Name *</label>
+      <input class="fi" id="f-name" placeholder="e.g. Kwame Asante Boateng">
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="f-email">Email Address * <span data-style="color:#475569;font-weight:400;text-transform:none">(used to login)</span></label>
+      <input class="fi" id="f-email" type="email" placeholder="e.g. kwame.boateng@kstu.edu.gh">
+    </div>
+    <div class="form-row">
+      <label class="form-label" for="f-pw">Password * <span data-style="color:#475569;font-weight:400;text-transform:none">(min 6 characters)</span></label>
+      <div class="pw-reveal">
+        <input class="fi" id="f-pw" type="password" placeholder="Create a password" data-style="padding-right:2.5rem">
+        <button class="pw-eye" onclick="togglePw('f-pw',this)">👁</button>
+      </div>
+    </div>
+
+    <!-- Student-only fields -->
+    <div id="student-fields">
+      <div class="form-row">
+        <label class="form-label" for="f-student-id">Student ID *</label>
+        <input class="fi" id="f-student-id" placeholder="e.g. KsTU/2024/0042">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="f-programme">Programme *</label>
+        <select class="fi" id="f-programme">
+          <option value="">Select programme…</option>
+          <optgroup label="Applied Sciences">
+            <option>BTech Computer Technology</option>
+            <option>BTech Artificial Intelligence</option>
+            <option>BTech Data Science</option>
+            <option>BSc Medical Lab Technology</option>
+          </optgroup>
+          <optgroup label="Engineering">
+            <option>BEng Automotive Engineering</option>
+            <option>BEng Civil Engineering</option>
+            <option>BEng Electrical/Electronic</option>
+            <option>BEng Mechatronics</option>
+          </optgroup>
+          <optgroup label="Business School">
+            <option>BSc Accountancy with Informatics</option>
+            <option>BSc Banking & Finance</option>
+            <option>BSc Marketing</option>
+            <option>BSc Procurement & SCM</option>
+          </optgroup>
+          <optgroup label="Built Environment">
+            <option>BTech Building Technology</option>
+            <option>BSc Estate Management</option>
+          </optgroup>
+          <optgroup label="Creative Arts">
+            <option>BTech Fashion Design & Technology</option>
+            <option>BTech Interior Design Technology</option>
+          </optgroup>
+          <optgroup label="Health Sciences">
+            <option>BSc Applied Statistics (Health)</option>
+          </optgroup>
+          <optgroup label="Entrepreneurship">
+            <option>BSc Agribusiness Management</option>
+            <option>BTech Hospitality Management</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="f-level">Level *</label>
+        <select class="fi" id="f-level">
+          <option value="">Select level…</option>
+          <option>Level 100</option><option>Level 200</option><option>Level 300</option><option>Level 400</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Lecturer/HOD fields -->
+    <div id="staff-fields" data-style="display:none">
+      <div class="form-row">
+        <label class="form-label" for="f-title">Title</label>
+        <select class="fi" id="f-title">
+          <option>Dr.</option><option>Prof.</option><option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Engr.</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="f-staff-id">Staff ID *</label>
+        <input class="fi" id="f-staff-id" placeholder="e.g. KsTU/STF/0012">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="f-department">Department *</label>
+        <select class="fi" id="f-department">
+          <option value="">Select department…</option>
+          <option>Applied Sciences</option>
+          <option>Engineering</option>
+          <option>Business School</option>
+          <option>Built & Natural Environment</option>
+          <option>Creative Arts & Technology</option>
+          <option>Health Sciences</option>
+          <option>Entrepreneurship & Enterprise</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-err" id="form-err"></div>
+    <div id="form-success" data-style="display:none" class="form-success"></div>
+
+    <div data-style="display:flex;gap:0.5rem;margin-top:1rem" id="form-btns">
+      <button class="btn btn-o" data-style="flex:1" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" data-style="flex:2" onclick="createAccount()" id="create-btn">Create Account</button>
+    </div>
+
+    <!-- Credentials display after creation -->
+    <div id="cred-display" data-style="display:none;margin-top:1rem">
+      <div class="gc green" data-style="padding:0.875rem">
+        <div data-style="font-size:0.75rem;color:#34d399;font-weight:600;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em">✅ Account Created Successfully!</div>
+        <div data-style="font-size:0.82rem;line-height:1.9">
+          <div data-style="display:flex;justify-content:space-between;align-items:center">
+            <span data-style="color:#94a3b8">Name:</span>
+            <span id="cred-name" data-style="font-weight:500"></span>
+          </div>
+          <div data-style="display:flex;justify-content:space-between;align-items:center">
+            <span data-style="color:#94a3b8">Email:</span>
+            <div data-style="display:flex;align-items:center;gap:0.4rem"><span id="cred-email"></span><button class="copy-btn" onclick="copyText('cred-email')">Copy</button></div>
+          </div>
+          <div data-style="display:flex;justify-content:space-between;align-items:center">
+            <span data-style="color:#94a3b8">Password:</span>
+            <div data-style="display:flex;align-items:center;gap:0.4rem"><span id="cred-pw"></span><button class="copy-btn" onclick="copyText('cred-pw')">Copy</button></div>
+          </div>
+          <div data-style="display:flex;justify-content:space-between;align-items:center">
+            <span data-style="color:#94a3b8">Role:</span>
+            <span id="cred-role"></span>
+          </div>
+        </div>
+        <div data-style="margin-top:0.75rem;font-size:0.72rem;color:#475569">⚠ Share these credentials securely with the user. They can log in at the CampusIQ student/lecturer app.</div>
+      </div>
+      <div data-style="display:flex;gap:0.5rem;margin-top:0.75rem">
+        <button class="btn btn-o" data-style="flex:1" onclick="closeModal()">Close</button>
+        <button class="btn btn-p" data-style="flex:1" onclick="resetForm()">Add Another</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW/EDIT MODAL -->
+<div class="modal-bg" id="view-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span>Account Details</span>
+      <button class="modal-close" onclick="document.getElementById('view-modal').classList.remove('open')">✕</button>
+    </div>
+    <div id="view-modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ===== ADMIN AUTH =====
+let adminPw = localStorage.getItem('campusiq_admin_pw') || 'admin123';
+
+function applyStoredStyles(root=document){
+  root.querySelectorAll('[data-style]').forEach(el=>{
+    el.setAttribute('style',el.dataset.style||'');
+  });
+}
+applyStoredStyles();
+new MutationObserver(mutations=>{
+  for(const mutation of mutations){
+    mutation.addedNodes.forEach(node=>{
+      if(node && node.nodeType===1){
+        applyStoredStyles(node);
+      }
+    });
+  }
+}).observe(document.body,{childList:true,subtree:true});
+
+function adminLogin(){
+  const u=document.getElementById('a-user').value.trim();
+  const p=document.getElementById('a-pw').value;
+  const err=document.getElementById('a-err');
+  if(u==='admin' && p===adminPw){
+    document.getElementById('admin-login').style.display='none';
+    document.getElementById('main-topbar').style.display='flex';
+    document.getElementById('main-layout').style.display='flex';
+    buildDash();buildLogs();
+  } else {
+    err.textContent='Invalid credentials.';
+  }
+}
+function adminLogout(){
+  document.getElementById('admin-login').style.display='flex';
+  document.getElementById('main-topbar').style.display='none';
+  document.getElementById('main-layout').style.display='none';
+  document.getElementById('a-user').value='';
+  document.getElementById('a-pw').value='';
+  document.getElementById('a-err').textContent='';
+}
+document.getElementById('a-pw').addEventListener('keydown',e=>{if(e.key==='Enter')adminLogin()});
+
+function saveAdminPw(){
+  const p=document.getElementById('new-admin-pw').value.trim();
+  if(p&&p.length>=6){localStorage.setItem('campusiq_admin_pw',p);adminPw=p;document.getElementById('settings-msg').textContent='✅ Password updated!';}
+  else if(p){document.getElementById('settings-msg').style.color='#fca5a5';document.getElementById('settings-msg').textContent='Password must be at least 6 characters.';}
+  else{document.getElementById('settings-msg').textContent='✅ Settings saved!';}
+  setTimeout(()=>document.getElementById('settings-msg').textContent='',3000);
+}
+function saveAdminGroqKey(){
+  const k=document.getElementById('admin-groq-key').value.trim();
+  if(k&&k.startsWith('gsk_')){localStorage.setItem('campusiq_groq_key',k);document.getElementById('groq-save-msg').textContent='✅ Groq key saved!';}
+  else{document.getElementById('groq-save-msg').style.color='#fca5a5';document.getElementById('groq-save-msg').textContent='Key must start with gsk_';}
+  setTimeout(()=>document.getElementById('groq-save-msg').textContent='',3000);
+}
+
+// ===== USER STORE =====
+function getUsers(){try{return JSON.parse(localStorage.getItem('campusiq_users')||'[]')}catch{return[]}}
+function saveUsers(u){localStorage.setItem('campusiq_users',JSON.stringify(u))}
+function genId(){return Date.now().toString(36).toUpperCase()}
+function esc(t){return String(t==null?'':t).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+
+// ===== NAV =====
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(id==='dash')buildDash();
+  if(id==='students')renderStudents();
+  if(id==='lecturers')renderLecturers();
+  if(id==='hods')renderHODs();
+}
+
+// ===== DASHBOARD =====
+function buildDash(){
+  const users=getUsers();
+  const s=users.filter(u=>u.role==='student').length;
+  const l=users.filter(u=>u.role==='lecturer').length;
+  const h=users.filter(u=>u.role==='hod').length;
+  document.getElementById('dash-students').textContent=s;
+  document.getElementById('dash-lecturers').textContent=l;
+  document.getElementById('dash-hods').textContent=h;
+  document.getElementById('dash-total').textContent=users.length;
+  document.getElementById('user-count-top').textContent=users.length+' accounts';
+
+  const recent=document.getElementById('recent-accounts');
+  const latest=[...users].reverse().slice(0,10);
+  if(!latest.length){recent.innerHTML='<tr><td colspan="6" data-style="text-align:center;color:#475569;padding:1.5rem">No accounts created yet. Use the cards above to add your first account.</td></tr>';return;}
+  const roleCls={student:'bb',lecturer:'bg',hod:'bgo'};
+  recent.innerHTML=latest.map(u=>`<tr>
+    <td data-style="font-weight:500">${esc(u.name)}</td>
+    <td data-style="color:#475569;font-size:0.7rem">${esc(u.email)}</td>
+    <td><span class="badge ${roleCls[u.role]}">${esc(u.role)}</span></td>
+    <td data-style="color:#94a3b8;font-size:0.7rem">${esc(u.department||u.programme||'—')}</td>
+    <td data-style="color:#334155;font-size:0.7rem">${esc(u.createdAt||'—')}</td>
+    <td><div data-style="display:flex;gap:0.3rem">
+      <button class="btn btn-b" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="viewUser('${u.id}')">View</button>
+      <button class="btn btn-r" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="deleteUser('${u.id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+// ===== STUDENT TABLE =====
+function renderStudents(){
+  const search=(document.getElementById('search-students')?.value||'').toLowerCase();
+  const dept=(document.getElementById('filter-dept')?.value||'');
+  const users=getUsers().filter(u=>u.role==='student').filter(u=>{
+    const matchSearch=search===''||u.name.toLowerCase().includes(search)||u.email.toLowerCase().includes(search);
+    const matchDept=dept===''||u.department===dept;
+    return matchSearch&&matchDept;
+  });
+  const tb=document.getElementById('students-tbody');
+  const ct=document.getElementById('students-count');
+  if(!tb){return;}
+  if(users.length===0){
+    tb.innerHTML='<tr><td colspan="7" data-style="text-align:center;color:#475569;padding:1.5rem">No students found. Click "+ Add Student" to create the first student account.</td></tr>';
+    if(ct){ct.textContent='';}
+    return;
+  }
+  tb.innerHTML=users.reverse().map(u=>`<tr>
+    <td data-style="font-weight:500">${u.name}</td>
+    <td data-style="color:#475569;font-size:0.7rem">${u.email}</td>
+    <td data-style="font-size:0.72rem">${u.programme||'—'}</td>
+    <td data-style="color:#94a3b8;font-size:0.7rem">${u.department||'—'}</td>
+    <td data-style="font-family:monospace;font-size:0.7rem;color:#60c8ff">${u.studentId||'—'}</td>
+    <td data-style="color:#334155;font-size:0.68rem">${u.createdAt||'—'}</td>
+    <td><div data-style="display:flex;gap:0.3rem">
+      <button class="btn btn-b" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="viewUser('${u.id}')">View</button>
+      <button class="btn btn-r" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="deleteUser('${u.id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+  if(ct){ct.textContent=users.length===1?`Showing ${users.length} student`:`Showing ${users.length} students`;}
+}
+
+// ===== LECTURER TABLE =====
+function renderLecturers(){
+  const search=(document.getElementById('search-lecturers')?.value||'').toLowerCase();
+  const users=getUsers().filter(u=>u.role==='lecturer').filter(u=>!search||(u.name.toLowerCase().includes(search)||u.email.toLowerCase().includes(search)));
+  const tb=document.getElementById('lecturers-tbody');const ct=document.getElementById('lecturers-count');
+  if(!tb){return;}
+  if(users.length===0){
+    tb.innerHTML='<tr><td colspan="7" data-style="text-align:center;color:#475569;padding:1.5rem">No lecturers found. Click "+ Add Lecturer" to create the first lecturer account.</td></tr>';
+    if(ct){ct.textContent='';}
+    return;
+  }
+  tb.innerHTML=users.reverse().map(u=>`<tr>
+    <td data-style="font-weight:500">${u.name}</td>
+    <td data-style="color:#475569;font-size:0.7rem">${u.email}</td>
+    <td data-style="color:#94a3b8;font-size:0.72rem">${u.title||''}</td>
+    <td data-style="font-size:0.72rem">${u.department||'—'}</td>
+    <td data-style="font-family:monospace;font-size:0.7rem;color:#34d399">${u.staffId||'—'}</td>
+    <td data-style="color:#334155;font-size:0.68rem">${u.createdAt||'—'}</td>
+    <td><div data-style="display:flex;gap:0.3rem">
+      <button class="btn btn-b" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="viewUser('${u.id}')">View</button>
+      <button class="btn btn-r" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="deleteUser('${u.id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+  if(ct){ct.textContent=users.length===1?`Showing ${users.length} lecturer`:`Showing ${users.length} lecturers`;}
+}
+
+// ===== HOD TABLE =====
+function renderHODs(){
+  const users=getUsers().filter(u=>u.role==='hod');
+  const tb=document.getElementById('hods-tbody');const ct=document.getElementById('hods-count');
+  if(!tb){return;}
+  if(users.length===0){
+    tb.innerHTML='<tr><td colspan="6" data-style="text-align:center;color:#475569;padding:1.5rem">No HODs found. Click "+ Add HOD" to create the first HOD account.</td></tr>';
+    if(ct){ct.textContent='';}
+    return;
+  }
+  tb.innerHTML=users.reverse().map(u=>`<tr>
+    <td data-style="font-weight:500">${u.name}</td>
+    <td data-style="color:#475569;font-size:0.7rem">${u.email}</td>
+    <td data-style="font-size:0.72rem">${u.department||'—'}</td>
+    <td data-style="font-family:monospace;font-size:0.7rem;color:#fcd34d">${u.staffId||'—'}</td>
+    <td data-style="color:#334155;font-size:0.68rem">${u.createdAt||'—'}</td>
+    <td><div data-style="display:flex;gap:0.3rem">
+      <button class="btn btn-b" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="viewUser('${u.id}')">View</button>
+      <button class="btn btn-r" data-style="font-size:0.6rem;padding:0.18rem 0.45rem" onclick="deleteUser('${u.id}')">Delete</button>
+    </div></td>
+  </tr>`).join('');
+  if(ct){ct.textContent=users.length===1?`Showing ${users.length} HOD`:`Showing ${users.length} HODs`;}
+}
+
+// ===== MODAL =====
+let currentModalRole='student';
+function openModal(role){
+  currentModalRole=role;
+  resetForm();
+  const titles={student:'🎓 Create Student Account',lecturer:'👨‍🏫 Create Lecturer Account',hod:'🏛 Create HOD Account'};
+  document.getElementById('modal-title-text').textContent=titles[role];
+  document.getElementById('student-fields').style.display=role==='student'?'block':'none';
+  document.getElementById('staff-fields').style.display=role==='student'?'none':'block';
+  document.getElementById('create-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('create-modal').classList.remove('open');resetForm();}
+function resetForm(){
+  ['f-name','f-email','f-pw','f-student-id','f-staff-id'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f-programme','f-level','f-title','f-department'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  document.getElementById('form-err').textContent='';
+  document.getElementById('form-success').style.display='none';
+  document.getElementById('cred-display').style.display='none';
+  document.getElementById('form-btns').style.display='flex';
+}
+document.getElementById('create-modal').addEventListener('click',e=>{if(e.target===document.getElementById('create-modal'))closeModal()});
+
+function buildStudentAccount(newUser,err){
+  const prog=document.getElementById('f-programme').value;
+  const lvl=document.getElementById('f-level').value;
+  const sid=document.getElementById('f-student-id').value.trim();
+  if(!prog){err.textContent='Please select a programme.';return false}
+  if(!lvl){err.textContent='Please select a level.';return false}
+  if(!sid){err.textContent='Student ID is required.';return false}
+  const deptMap={'BTech Computer Technology':'Applied Sciences','BTech Artificial Intelligence':'Applied Sciences','BTech Data Science':'Applied Sciences','BSc Medical Lab Technology':'Applied Sciences','BEng Automotive Engineering':'Engineering','BEng Civil Engineering':'Engineering','BEng Electrical/Electronic':'Engineering','BEng Mechatronics':'Engineering','BSc Accountancy with Informatics':'Business School','BSc Banking & Finance':'Business School','BSc Marketing':'Business School','BSc Procurement & SCM':'Business School','BTech Building Technology':'Built Environment','BSc Estate Management':'Built Environment','BTech Fashion Design & Technology':'Creative Arts','BTech Interior Design Technology':'Creative Arts','BSc Applied Statistics (Health)':'Health Sciences','BSc Agribusiness Management':'Entrepreneurship','BTech Hospitality Management':'Entrepreneurship'};
+  newUser.programme=prog;newUser.level=lvl;newUser.studentId=sid;newUser.department=deptMap[prog]||'Applied Sciences';
+  return true;
+}
+
+function buildStaffAccount(newUser,err){
+  const title=document.getElementById('f-title').value;
+  const dept=document.getElementById('f-department').value;
+  const staffId=document.getElementById('f-staff-id').value.trim();
+  if(!dept){err.textContent='Please select a department.';return false}
+  if(!staffId){err.textContent='Staff ID is required.';return false}
+  newUser.title=title;newUser.department=dept;newUser.staffId=staffId;
+  if(title)newUser.name=title+' '+newUser.name;
+  return true;
+}
+
+function createAccount(){
+  const err=document.getElementById('form-err');err.textContent='';
+  const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim().toLowerCase();
+  const pw=document.getElementById('f-pw').value;
+  if(!name){err.textContent='Full name is required.';return}
+  if(!email||!email.includes('@')){err.textContent='Please enter a valid email address.';return}
+  if(!pw||pw.length<6){err.textContent='Password must be at least 6 characters.';return}
+  const users=getUsers();
+  if(users.some(u=>u.email.toLowerCase()===email)){err.textContent='An account with this email already exists.';return}
+
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  const newUser={
+    id:genId(),
+    name,email,password:pw,
+    role:currentModalRole,
+    createdAt:dateStr,
+  };
+
+  const buildAccount=currentModalRole==='student'?buildStudentAccount:buildStaffAccount;
+  if(!buildAccount(newUser,err))return;
+
+  users.push(newUser);
+  saveUsers(users);
+  addLog(`Account created: ${newUser.name} (${currentModalRole}) — ${email}`);
+
+  // Show credentials
+  document.getElementById('form-btns').style.display='none';
+  document.getElementById('cred-display').style.display='block';
+  document.getElementById('cred-name').textContent=newUser.name;
+  document.getElementById('cred-email').textContent=email;
+  document.getElementById('cred-pw').textContent=pw;
+  document.getElementById('cred-role').textContent=currentModalRole.charAt(0).toUpperCase()+currentModalRole.slice(1);
+  buildDash();
+}
+
+// ===== VIEW USER =====
+function viewUser(id){
+  const users=getUsers();const u=users.find(x=>x.id===id);if(!u)return;
+  const roleCls={student:'bb',lecturer:'bg',hod:'bgo'};
+  document.getElementById('view-modal-content').innerHTML=`
+    <div data-style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.82rem">
+      <div data-style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Role</span><span class="badge ${roleCls[u.role]}">${esc(u.role)}</span></div>
+      <div data-style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Name</span><span data-style="font-weight:500">${esc(u.name)}</span></div>
+      <div data-style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Email</span><div data-style="display:flex;align-items:center;gap:0.4rem"><span id="v-email">${esc(u.email)}</span><button class="copy-btn" onclick="copyText('v-email')">Copy</button></div></div>
+      <div data-style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Password</span><div data-style="display:flex;align-items:center;gap:0.4rem"><span id="v-pw">${esc(u.password)}</span><button class="copy-btn" onclick="copyText('v-pw')">Copy</button></div></div>
+      ${u.studentId?`<div data-style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Student ID</span><span data-style="font-family:monospace;color:#60c8ff">${esc(u.studentId)}</span></div>`:''}
+      ${u.staffId?`<div data-style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Staff ID</span><span data-style="font-family:monospace;color:#34d399">${esc(u.staffId)}</span></div>`:''}
+      ${u.programme?`<div data-style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Programme</span><span>${esc(u.programme)}</span></div>`:''}
+      ${u.level?`<div data-style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Level</span><span>${esc(u.level)}</span></div>`:''}
+      ${u.department?`<div data-style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span data-style="color:#94a3b8">Department</span><span>${esc(u.department)}</span></div>`:''}
+      <div data-style="display:flex;justify-content:space-between;padding:0.5rem 0"><span data-style="color:#94a3b8">Created</span><span data-style="color:#334155">${esc(u.createdAt||'—')}</span></div>
+    </div>
+    <div data-style="display:flex;gap:0.5rem;margin-top:1.25rem">
+      <button class="btn btn-o" data-style="flex:1" onclick="document.getElementById('view-modal').classList.remove('open')">Close</button>
+      <button class="btn btn-r" data-style="flex:1" onclick="deleteUser('${esc(u.id)}');document.getElementById('view-modal').classList.remove('open')">Delete Account</button>
+    </div>`;
+  document.getElementById('view-modal').classList.add('open');
+}
+document.getElementById('view-modal').addEventListener('click',e=>{if(e.target===document.getElementById('view-modal'))document.getElementById('view-modal').classList.remove('open')});
+
+// ===== DELETE USER =====
+function deleteUser(id){
+  const users=getUsers();const u=users.find(x=>x.id===id);
+  if(!u)return;
+  if(!confirm(`Delete account for ${u.name} (${u.email})?\n\nThis cannot be undone.`))return;
+  saveUsers(users.filter(x=>x.id!==id));
+  addLog(`Account deleted: ${u.name} (${u.role}) — ${u.email}`);
+  buildDash();
+  renderStudents();renderLecturers();renderHODs();
+}
+
+// ===== HELPERS =====
+function togglePw(id,btn){const el=document.getElementById(id);el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈';}
+async function copyText(id){
+  const el=document.getElementById(id);
+  if(!el){return;}
+  try{
+    await navigator.clipboard.writeText(el.textContent);
+    const orig=el.style.color;
+    el.style.color='#34d399';
+    setTimeout(()=>{el.style.color=orig;},1200);
+  }catch{}
+}
+
+// ===== LOGS =====
+let logs=JSON.parse(localStorage.getItem('campusiq_logs')||'[]');
+function addLog(msg){
+  const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  logs.unshift({t,msg});
+  if(logs.length>50)logs=logs.slice(0,50);
+  localStorage.setItem('campusiq_logs',JSON.stringify(logs));
+}
+function buildLogs(){
+  const lc=document.getElementById('log-cont');if(!lc)return;
+  const allLogs=[...logs,{t:'08:00:01',msg:'CampusIQ backend started — all services nominal'},{t:'07:59:59',msg:'Papi AI model loaded: llama3-8b-8192 (Groq Free)'},{t:'07:58:00',msg:'Admin logged in: admin@kstu.edu.gh'}];
+  lc.innerHTML=allLogs.map(l=>`<div data-style="padding:0.18rem 0.875rem;border-bottom:1px solid rgba(255,255,255,0.03)"><span data-style="color:#334155">${l.t} &nbsp;</span><span data-style="color:#475569">[INFO] &nbsp;</span><span data-style="color:#64748b">${l.msg}</span></div>`).join('');
+}
+</script>
+</body>
+</html>

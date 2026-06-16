@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusIQ — Courses & Campus | KsTU</title>
+<link rel="stylesheet" href="courses.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">⬡ CampusIQ</a>
+  <div class="nav-tabs">
+    <button type="button" class="nav-tab active" onclick="showSection('courses-section',this)">📚 Courses</button>
+    <button type="button" class="nav-tab" onclick="showSection('my-courses-section',this)">🎯 My Courses</button>
+    <button type="button" class="nav-tab" onclick="showSection('location-section',this)">📍 Campus Locator</button>
+  </div>
+  <div class="nav-r">
+    <span class="nav-user" id="nav-user-name">Student</span>
+    <button type="button" class="back-btn" onclick="window.location.href='index.html'">← Back to App</button>
+  </div>
+</nav>
+
+<!-- ===== COURSES SECTION ===== -->
+<div class="section active" id="courses-section">
+  <div class="sh"><h2>Course Catalogue</h2><div class="sh-line"></div><span id="course-count" class="badge bb">0 courses</span></div>
+
+  <!-- Search + Filters -->
+  <div class="flex-between">
+    <div class="search-wrap min-width-200">
+      <span class="search-icon">🔍</span>
+      <input class="search-box" id="course-search" placeholder="Search courses, lecturers, codes…" oninput="renderCourses()">
+    </div>
+    <div class="flex-col-gap">
+      <button type="button" class="filter-chip active" onclick="setFilter('all',this)">All</button>
+      <button type="button" class="filter-chip" onclick="setFilter('sci',this)">🔬 Sciences</button>
+      <button type="button" class="filter-chip" onclick="setFilter('eng',this)">⚙️ Engineering</button>
+      <button type="button" class="filter-chip" onclick="setFilter('biz',this)">💼 Business</button>
+      <button type="button" class="filter-chip" onclick="setFilter('arts',this)">🎨 Arts</button>
+      <button type="button" class="filter-chip" onclick="setFilter('enrolled',this)">✓ Enrolled</button>
+      <button type="button" class="filter-chip" onclick="setFilter('interested',this)">★ Interested</button>
+    </div>
+  </div>
+
+  <div class="g3" id="courses-grid"></div>
+</div>
+
+<!-- ===== MY COURSES SECTION ===== -->
+<div class="section" id="my-courses-section">
+  <div class="sh"><h2>My Course Dashboard</h2><div class="sh-line"></div></div>
+
+  <!-- Stats Row -->
+  <div class="g4 margin-bottom-1-5rem">
+    <div class="gc blue stats-card">
+      <div id="enrolled-count" class="stat-value stat-value-blue">0</div>
+      <div class="stat-label">Enrolled</div>
+    </div>
+    <div class="gc gold stats-card">
+      <div id="interested-count" class="stat-value stat-value-gold">0</div>
+      <div class="stat-label">Interested</div>
+    </div>
+    <div class="gc green stats-card">
+      <div id="credits-count" class="stat-value stat-value-green">0</div>
+      <div class="stat-label">Credits</div>
+    </div>
+    <div class="gc purple stats-card">
+      <div id="progress-pct" class="stat-value stat-value-purple">0%</div>
+      <div class="stat-label">Progress</div>
+    </div>
+  </div>
+
+  <!-- Overall Progress Ring -->
+  <div class="g2 margin-bottom-1-5rem">
+    <div class="gc">
+      <div class="sh"><h2>Semester Progress</h2><div class="sh-line"></div></div>
+      <div class="flex-between-wrap">
+        <div class="prog-ring">
+          <svg width="120" height="120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#1e293b" stroke-width="8"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="url(#pg1)" stroke-width="8"
+              stroke-dasharray="314" stroke-dashoffset="314" id="prog-ring-circle"
+              stroke-linecap="round" transform="rotate(-90 60 60)"/>
+            <defs><linearGradient id="pg1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient></defs>
+          </svg>
+          <div class="prog-ring-label">
+            <div id="ring-pct" class="stat-value stat-value-green">0%</div>
+            <div class="prog-ring-caption">complete</div>
+          </div>
+        </div>
+        <div class="flex-1 min-width-150">
+          <div class="card-summary">Track your semester progress across all enrolled courses. Mark topics as complete to update your progress.</div>
+          <div class="card-note card-note-strong">📅 Sem 2 ends: Aug 2026</div>
+          <div class="card-note card-note-highlight">⚡ Week 10 of 15</div>
+        </div>
+      </div>
+    </div>
+    <div class="gc">
+      <div class="sh"><h2>Upcoming Deadlines</h2><div class="sh-line"></div></div>
+      <div id="deadlines-list">
+        <div class="card-note text-center">Enrol in courses to see deadlines here</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enrolled Courses List -->
+  <div class="sh"><h2>Enrolled Courses</h2><div class="sh-line"></div></div>
+  <div id="enrolled-list">
+    <div class="empty-state">
+      You haven't enrolled in any courses yet.<br>
+      <button class="btn btn-p small-btn" onclick="showSection('courses-section',document.querySelector('.nav-tab'))">Browse Course Catalogue →</button>
+    </div>
+  </div>
+
+  <!-- Interested Courses -->
+  <div class="sh margin-top-1-5rem"><h2>Courses I'm Interested In</h2><div class="sh-line"></div></div>
+  <div id="interested-list">
+    <div class="empty-state empty-state--small">No courses saved yet. Browse the catalogue and click ★ Interested on any course.</div>
+  </div>
+</div>
+
+<!-- ===== CAMPUS LOCATOR SECTION ===== -->
+<div class="section" id="location-section">
+  <div class="sh"><h2>Campus Student Locator</h2><div class="sh-line"></div><span class="badge bc" id="sharing-badge">Sharing Off</span></div>
+
+  <!-- Privacy notice banner -->
+  <div class="privacy-card margin-bottom-1-25rem">
+    <div class="privacy-notice-inner">
+      <span class="privacy-notice-icon">🔒</span>
+      <div>
+        <div class="privacy-card-header">Your Privacy is Protected</div>
+        <div class="privacy-text">Location sharing is <strong class="highlight-gold">completely opt-in</strong>. Your location is only visible to other KsTU students who have also opted in. You can stop sharing at any time. No location data is stored — it's only live while you're active.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 margin-bottom-1-25rem">
+    <!-- MY LOCATION CONTROLS -->
+    <div class="privacy-card">
+    <div class="privacy-card-header">🛡 My Privacy Controls</div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="privacy-notice-title">Share My Location</div>
+          <div class="label">Show me on the campus map</div>
+        </div>
+        <button type="button" class="toggle" id="toggle-share" onclick="togglePrivacy('share')" aria-pressed="false" title="Toggle share my location"></button>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="privacy-notice-title">Show My Name</div>
+          <div class="label">Others see your name on the map</div>
+        </div>
+        <button type="button" class="toggle" id="toggle-name" onclick="togglePrivacy('name')" aria-pressed="false" title="Toggle show my name"></button>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="privacy-notice-title">Show Exact Location</div>
+          <div class="label">Off = show building only</div>
+        </div>
+        <button type="button" class="toggle" id="toggle-exact" onclick="togglePrivacy('exact')" aria-pressed="false" title="Toggle exact location"></button>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="privacy-notice-title">Discoverable by Friends Only</div>
+          <div class="label">Only people you've connected with</div>
+        </div>
+        <button type="button" class="toggle on" id="toggle-friends" onclick="togglePrivacy('friends')" aria-pressed="true" title="Toggle discoverable by friends"></button>
+      </div>
+
+      <div class="privacy-status" id="sharing-status-text">
+        📍 Location sharing is <span class="status-highlight">OFF</span>. You are invisible on the campus map. Toggle above to start sharing.
+      </div>
+
+      <div class="button-row">
+        <button class="btn btn-g flex-1" id="share-main-btn" onclick="activateSharing()">Enable Location Sharing</button>
+        <button class="btn btn-r btn-xxs" onclick="stopSharing()" title="Stop sharing immediately">✕ Stop</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div>
+      <div class="gc blue margin-bottom-0-875-rem">
+        <div class="sh"><h2>Live on Campus</h2><div class="sh-line"></div><span class="badge bg" id="live-count">0 students</span></div>
+        <div class="card-summary">Students currently sharing their location</div>
+        <div id="online-students-list">
+          <div class="info-note info-note--small">No students sharing right now. Be the first!</div>
+        </div>
+      </div>
+      <div class="gc">
+        <div class="sh"><h2>Busy Areas</h2><div class="sh-line"></div></div>
+        <div id="busy-areas"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMPUS MAP -->
+  <div class="sh"><h2>Live Campus Map</h2><div class="sh-line"></div><span class="badge bg" id="map-live-badge">0 students visible</span></div>
+  <div class="location-map" id="campus-map">
+    <svg id="map-svg" viewBox="0 0 560 340">
+      <defs>
+        <pattern id="mgrid" width="28" height="28" patternUnits="userSpaceOnUse">
+          <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(6,182,212,0.07)" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="560" height="340" fill="url(#mgrid)"/>
+      <!-- Roads -->
+      <path d="M0,170 H560" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+      <path d="M280,0 V340" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+      <path d="M0,85 H200" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+      <path d="M0,255 H200" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+      <!-- Buildings -->
+      <rect x="50" y="45" width="100" height="70" rx="5" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.2"/>
+      <text x="100" y="82" text-anchor="middle" fill="#60c8ff" font-size="9" font-family="Exo 2" font-weight="600">Main Block</text>
+      <text x="100" y="96" text-anchor="middle" fill="#475569" font-size="7" font-family="Exo 2">Admin · Registry</text>
+
+      <rect x="185" y="38" width="115" height="78" rx="5" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" stroke-width="1.2"/>
+      <text x="242" y="80" text-anchor="middle" fill="#c4b5fd" font-size="9" font-family="Exo 2" font-weight="600">Engineering</text>
+      <text x="242" y="94" text-anchor="middle" fill="#475569" font-size="7" font-family="Exo 2">Faculty Block A</text>
+
+      <rect x="345" y="48" width="90" height="65" rx="5" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.2"/>
+      <text x="390" y="84" text-anchor="middle" fill="#fcd34d" font-size="9" font-family="Exo 2" font-weight="600">Library</text>
+      <text x="390" y="97" text-anchor="middle" fill="#475569" font-size="7" font-family="Exo 2">KsTU Library</text>
+
+      <rect x="50" y="200" width="110" height="70" rx="5" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.2"/>
+      <text x="105" y="237" text-anchor="middle" fill="#34d399" font-size="9" font-family="Exo 2" font-weight="600">Business School</text>
+      <text x="105" y="251" text-anchor="middle" fill="#475569" font-size="7" font-family="Exo 2">Faculty Block B</text>
+
+      <rect x="193" y="205" width="116" height="70" rx="5" fill="rgba(6,182,212,0.15)" stroke="#06b6d4" stroke-width="1.2"/>
+      <text x="251" y="240" text-anchor="middle" fill="#22d3ee" font-size="9" font-family="Exo 2" font-weight="600">Applied Sciences</text>
+      <text x="251" y="254" text-anchor="middle" fill="#475569" font-size="7" font-family="Exo 2">Computer Dept</text>
+
+      <rect x="348" y="208" width="88" height="58" rx="5" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.2"/>
+      <text x="392" y="240" text-anchor="middle" fill="#fca5a5" font-size="9" font-family="Exo 2" font-weight="600">Cafeteria</text>
+
+      <ellipse cx="490" cy="130" rx="52" ry="38" fill="rgba(16,185,129,0.07)" stroke="#10b981" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="490" y="134" text-anchor="middle" fill="#34d399" font-size="9" font-family="Exo 2" font-weight="600">Sports Field</text>
+
+      <rect x="452" y="232" width="85" height="60" rx="5" fill="rgba(236,72,153,0.15)" stroke="#ec4899" stroke-width="1.2"/>
+      <text x="494" y="263" text-anchor="middle" fill="#f9a8d4" font-size="9" font-family="Exo 2" font-weight="600">Hostel Block</text>
+      <text x="494" y="277" text-anchor="middle" fill="#475569" font-size="7" font-family="Exo 2">Volta · Pra · Komfo</text>
+
+      <!-- My location marker (hidden until sharing on) -->
+      <g id="my-marker">
+        <circle r="8" fill="#3b82f6" stroke="#fff" stroke-width="2" id="my-dot"/>
+        <circle r="16" fill="rgba(59,130,246,0.2)" id="my-ring">
+          <animate attributeName="r" values="8;20;8" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.8;0;0.8" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <text id="my-label" text-anchor="middle" fill="#60c8ff" font-size="8" font-family="Exo 2" dy="22" font-weight="600">You</text>
+      </g>
+
+      <!-- Other students layer -->
+      <g id="students-layer"></g>
+    </svg>
+
+    <!-- Map legend -->
+    <div class="map-legend">
+      <div class="legend-item"><span class="legend-dot dot-you"></span> You</div>
+      <div class="legend-item"><span class="legend-dot dot-students"></span> Students</div>
+      <div class="legend-item"><span class="legend-dot dot-lecturers"></span> Lecturers</div>
+    </div>
+  </div>
+
+  <!-- Tooltip for map -->
+  <div id="map-tooltip" class="tooltip"></div>
+</div>
+
+<!-- ===== COURSE DETAIL MODAL ===== -->
+<div class="modal-bg" id="course-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-course-badge" class="modal-course-badge"></div>
+      <div id="modal-course-name" class="modal-course-name"></div>
+      <div id="modal-course-meta" class="modal-course-meta"></div>
+      <div id="modal-course-tags" class="modal-course-tags"></div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Tabs -->
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" onclick="switchModalTab('overview',this)">Overview</button>
+        <button class="modal-tab-btn" onclick="switchModalTab('syllabus',this)">Syllabus</button>
+        <button class="modal-tab-btn" onclick="switchModalTab('prereqs',this)">Prerequisites</button>
+        <button class="modal-tab-btn" onclick="switchModalTab('resources',this)">Resources</button>
+      </div>
+
+      <div id="tab-overview" class="modal-section active">
+        <div class="gc blue margin-bottom-1-rem padding-0-875-rem">
+          <div class="description-header">Course Description</div>
+          <div class="description-text" id="modal-description"></div>
+        </div>
+        <div class="g2 gap-0-75 margin-bottom-1-rem">
+          <div class="gc padding-0-75-rem"><div class="label-text">Lecturer</div><div class="value-text" id="modal-lecturer"></div></div>
+          <div class="gc padding-0-75-rem"><div class="label-text">Credit Hours</div><div class="value-text" id="modal-credits"></div></div>
+          <div class="gc padding-0-75-rem"><div class="label-text">Assessment</div><div class="value-text" id="modal-assessment"></div></div>
+          <div class="gc padding-0-75-rem"><div class="label-text">Schedule</div><div class="value-text" id="modal-schedule"></div></div>
+        </div>
+        <div id="modal-outcomes-block" class="margin-bottom-1-rem">
+          <div class="label-text">Learning Outcomes</div>
+          <div id="modal-outcomes"></div>
+        </div>
+        <div id="modal-enroll-status" class="margin-bottom-0-5rem"></div>
+      </div>
+
+      <div id="tab-syllabus" class="modal-section">
+        <div class="card-note info-note--small">Weekly breakdown of topics covered in this course.</div>
+        <div id="modal-syllabus"></div>
+      </div>
+
+      <div id="tab-prereqs" class="modal-section">
+        <div class="card-note info-note--small">You must complete these courses before enrolling.</div>
+        <div id="modal-prereqs"></div>
+      </div>
+
+      <div id="tab-resources" class="modal-section">
+        <div class="card-note info-note--small">Download materials for this course.</div>
+        <div id="modal-resources"></div>
+      </div>
+    </div>
+    <div class="modal-footer" id="modal-footer-btns"></div>
+  </div>
+</div>
+
+<!-- Notification -->
+  <div id="notif-popup" class="notif"></div>
+
+<script>
+// ===== USER =====
+function getUsers(){try{return JSON.parse(localStorage.getItem('campusiq_users')||'[]')}catch{return[]}}
+function getEnrollments(){try{return JSON.parse(localStorage.getItem('campusiq_enrollments')||'{}')}catch{return{}}}
+function saveEnrollments(e){localStorage.setItem('campusiq_enrollments',JSON.stringify(e))}
+function getPrivacy(){try{return JSON.parse(localStorage.getItem('campusiq_privacy')||'{"share":false,"name":true,"exact":false,"friends":true}')}catch{return{share:false,name:true,exact:false,friends:true}}}
+function savePrivacy(p){localStorage.setItem('campusiq_privacy',JSON.stringify(p))}
+
+// Figure out current user
+const urlParams = new URLSearchParams(location.search);
+const urlUser = urlParams.get('u');
+const urlTab = urlParams.get('tab');
+let currentUser = null;
+if(urlUser){
+  currentUser = getUsers().find(u=>u.email===urlUser) || null;
+}
+if(!currentUser){
+  const lastEmail = localStorage.getItem('campusiq_last_user');
+  if(lastEmail) currentUser = getUsers().find(u=>u.email===lastEmail) || null;
+}
+const myKey = currentUser ? currentUser.email : 'guest';
+document.getElementById('nav-user-name').textContent = currentUser ? currentUser.name.split(' ')[0] : 'Guest';
+// Auto-navigate to tab if specified in URL
+if(urlTab === 'location'){
+  setTimeout(()=>{
+    const locBtn = document.querySelectorAll('.nav-tab')[2];
+    showSection('location-section', locBtn);
+  }, 100);
+}
+
+// ===== FULL COURSE DATA =====
+const COURSES = [
+  // APPLIED SCIENCES
+  {id:'CPT101',code:'CPT 101',name:'Introduction to Computing',faculty:'sci',dept:'Applied Sciences',level:100,credits:3,lecturer:'Mr. Asante C.',schedule:'Tue/Thu 8:00–10:00, Lab A-101',assessment:'CA 40% · Exam 60%',
+   description:'Foundational course covering computer hardware, software, operating systems, the internet, and introductory programming concepts. Designed for all students entering technology-related programmes at KsTU.',
+   outcomes:['Understand how computers work at a hardware and software level','Navigate operating systems and productivity software confidently','Write simple programs in Python or Scratch','Use the internet and digital tools safely and effectively'],
+   prereqs:[],
+   syllabus:[
+    {week:'Week 1–2',topic:'Introduction to Computers',detail:'Hardware components, input/output devices, storage'},
+    {week:'Week 3–4',topic:'Operating Systems',detail:'Windows/Linux basics, file management, system settings'},
+    {week:'Week 5–6',topic:'Internet & Networking',detail:'How the internet works, browsers, email, cybersecurity basics'},
+    {week:'Week 7–8',topic:'Word Processing & Spreadsheets',detail:'Microsoft Word, Excel, Google Docs/Sheets'},
+    {week:'Week 9–10',topic:'Introduction to Programming',detail:'Python basics: variables, loops, conditions'},
+    {week:'Week 11–12',topic:'Databases Basics',detail:'What is a database, using simple SQL queries'},
+    {week:'Week 13–15',topic:'Project & Revision',detail:'Group project, past question review, exam prep'},
+   ],
+   tags:['Introductory','Programming','Foundations'],resources:['CPT101_Course_Outline.pdf','CPT101_Lab_Manual.pdf','CPT101_Past_Questions_2022-2024.pdf']},
+
+  {id:'CPT201',code:'CPT 201',name:'Object-Oriented Programming (Java)',faculty:'sci',dept:'Applied Sciences',level:200,credits:3,lecturer:'Dr. Boateng A.',schedule:'Mon/Wed 10:00–12:00, Lab A-203',assessment:'CA 40% · Exam 60%',
+   description:'An intermediate programming course using Java to teach object-oriented design principles including encapsulation, inheritance, polymorphism, and abstraction. Students build real-world applications.',
+   outcomes:['Design and implement object-oriented solutions in Java','Understand classes, objects, inheritance and polymorphism','Handle exceptions and file I/O in Java','Build GUI applications using JavaFX basics'],
+   prereqs:['CPT101'],
+   syllabus:[
+    {week:'Week 1–2',topic:'Java Fundamentals Review',detail:'Data types, control flow, methods, arrays'},
+    {week:'Week 3–5',topic:'Classes and Objects',detail:'Encapsulation, constructors, access modifiers'},
+    {week:'Week 6–8',topic:'Inheritance & Polymorphism',detail:'Extending classes, method overriding, abstract classes'},
+    {week:'Week 9–10',topic:'Interfaces & Collections',detail:'Java interfaces, ArrayList, HashMap'},
+    {week:'Week 11–12',topic:'Exception Handling & File I/O',detail:'Try-catch, reading/writing files in Java'},
+    {week:'Week 13–15',topic:'GUI Basics & Project',detail:'JavaFX introduction, group project development'},
+   ],
+   tags:['Java','OOP','Intermediate'],resources:['CPT201_Syllabus.pdf','CPT201_Lab_Exercises.pdf','Java_OOP_Reference_Guide.pdf','CPT201_Past_Questions_2022-2024.pdf']},
+
+  {id:'CPT301',code:'CPT 301',name:'Data Structures & Algorithms',faculty:'sci',dept:'Applied Sciences',level:300,credits:3,lecturer:'Dr. Mensah K.',schedule:'Mon 7:30–9:30, Wed 10:00–12:00, Lab A-201',assessment:'CA 40% · Exam 60%',
+   description:'Core course covering fundamental data structures (arrays, linked lists, trees, graphs, hash tables) and algorithm design techniques including sorting, searching, dynamic programming, and complexity analysis.',
+   outcomes:['Implement and use common data structures','Analyse algorithm time and space complexity using Big O notation','Apply sorting and searching algorithms effectively','Solve problems using dynamic programming and greedy techniques'],
+   prereqs:['CPT201','MAT101'],
+   syllabus:[
+    {week:'Week 1–2',topic:'Complexity Analysis',detail:'Big O, Omega, Theta notation, best/worst/average case'},
+    {week:'Week 3–4',topic:'Arrays & Linked Lists',detail:'Static/dynamic arrays, singly/doubly linked lists, circular lists'},
+    {week:'Week 5–6',topic:'Stacks & Queues',detail:'Implementation, applications, priority queues'},
+    {week:'Week 7–8',topic:'Trees',detail:'Binary trees, BSTs, AVL trees, traversals'},
+    {week:'Week 9',topic:'Heaps & Hashing',detail:'Min/max heaps, hash tables, collision resolution'},
+    {week:'Week 10–11',topic:'Graphs',detail:'BFS, DFS, shortest paths (Dijkstra), spanning trees'},
+    {week:'Week 12–13',topic:'Sorting Algorithms',detail:'QuickSort, MergeSort, HeapSort, RadixSort'},
+    {week:'Week 14–15',topic:'Dynamic Programming',detail:'Memoisation, tabulation, classic DP problems'},
+   ],
+   tags:['Algorithms','Core','Data Structures'],resources:['CPT301_Course_Outline.pdf','CPT301_Lecture_Notes_All.pdf','Algorithm_Cheatsheet.pdf','CPT301_Past_Questions_2021-2024.pdf','CPT301_Lab_Problems.pdf']},
+
+  {id:'CPT305',code:'CPT 305',name:'Artificial Intelligence & Machine Learning',faculty:'sci',dept:'Applied Sciences',level:300,credits:3,lecturer:'Dr. Boateng A.',schedule:'Mon 14:00–16:00, Thu 9:00–11:00, Lab A-205',assessment:'CA 40% · Project 20% · Exam 40%',
+   description:'Comprehensive introduction to AI and ML covering supervised/unsupervised learning, neural networks, natural language processing, and real-world applications. Python with scikit-learn and TensorFlow used throughout.',
+   outcomes:['Understand and implement supervised and unsupervised ML algorithms','Build, train and evaluate neural networks','Apply NLP techniques to text data','Develop end-to-end ML projects in Python'],
+   prereqs:['CPT201','MAT201','DSC201'],
+   syllabus:[
+    {week:'Week 1–2',topic:'Introduction to AI & Python for ML',detail:'AI history, Python, NumPy, Pandas, Matplotlib'},
+    {week:'Week 3–4',topic:'Supervised Learning',detail:'Linear regression, logistic regression, model evaluation'},
+    {week:'Week 5–6',topic:'Classification Algorithms',detail:'Decision trees, random forests, SVM, KNN'},
+    {week:'Week 7–8',topic:'Unsupervised Learning',detail:'K-means clustering, PCA, dimensionality reduction'},
+    {week:'Week 9–10',topic:'Neural Networks',detail:'Perceptrons, backpropagation, activation functions'},
+    {week:'Week 11–12',topic:'Deep Learning Basics',detail:'CNN for images, intro to TensorFlow/Keras'},
+    {week:'Week 13',topic:'NLP Introduction',detail:'Text preprocessing, sentiment analysis, transformers overview'},
+    {week:'Week 14–15',topic:'Project Presentations',detail:'End-to-end ML project: data → model → deployment'},
+   ],
+   tags:['AI','Machine Learning','Python','Advanced'],resources:['CPT305_Syllabus.pdf','ML_Algorithms_Reference.pdf','Python_ML_Starter_Kit.pdf','CPT305_Dataset_Pack.zip','CPT305_Past_Exams_2022-2024.pdf']},
+
+  {id:'DSC201',code:'DSC 201',name:'Statistics for Data Science',faculty:'sci',dept:'Applied Sciences',level:200,credits:3,lecturer:'Dr. Osei-Bonsu',schedule:'Tue/Thu 10:00–12:00, Room B-102',assessment:'CA 40% · Exam 60%',
+   description:'Statistical foundations essential for data science: descriptive statistics, probability theory, hypothesis testing, regression analysis, and statistical computing using R and Python.',
+   outcomes:['Apply descriptive and inferential statistics to real datasets','Conduct hypothesis tests and interpret results','Build and evaluate regression models','Use R and Python for statistical analysis'],
+   prereqs:['MAT101'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Descriptive Statistics',detail:'Mean, median, mode, variance, standard deviation, visualisation'},
+    {week:'Week 4–6',topic:'Probability Theory',detail:'Probability rules, distributions, Bayes theorem'},
+    {week:'Week 7–9',topic:'Inferential Statistics',detail:'Sampling, confidence intervals, hypothesis testing'},
+    {week:'Week 10–12',topic:'Regression Analysis',detail:'Simple & multiple linear regression, logistic regression'},
+    {week:'Week 13–15',topic:'Statistical Computing',detail:'R and Python for statistics, real dataset projects'},
+   ],
+   tags:['Statistics','Data Science','R','Python'],resources:['DSC201_Course_Guide.pdf','R_Statistical_Computing_Intro.pdf','Statistics_Formula_Sheet.pdf','DSC201_Past_Questions.pdf']},
+
+  // ENGINEERING
+  {id:'EEE301',code:'EEE 301',name:'Power Systems Engineering',faculty:'eng',dept:'Engineering',level:300,credits:3,lecturer:'Dr. Asante B.',schedule:'Mon/Wed 9:00–11:00, Lab E-201',assessment:'CA 40% · Exam 60%',
+   description:'Analysis of electrical power systems including generation, transmission, distribution and consumption. Topics include power flow, fault analysis, system stability and protection schemes.',
+   outcomes:['Analyse power flow in electrical networks','Perform fault calculations and protection coordination','Understand power system stability concepts','Apply load flow methods to real power systems'],
+   prereqs:['EEE201'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Power System Overview',detail:'Generation, transmission, distribution basics, per-unit system'},
+    {week:'Week 4–6',topic:'Load Flow Analysis',detail:'Gauss-Seidel, Newton-Raphson methods'},
+    {week:'Week 7–9',topic:'Fault Analysis',detail:'Symmetrical & unsymmetrical faults, sequence networks'},
+    {week:'Week 10–12',topic:'System Stability',detail:'Transient and steady-state stability, equal area criterion'},
+    {week:'Week 13–15',topic:'Protection Systems',detail:'Relays, circuit breakers, protection coordination'},
+   ],
+   tags:['Electrical','Power','Engineering'],resources:['EEE301_Course_Outline.pdf','Power_Systems_Formulas.pdf','EEE301_Past_Questions.pdf']},
+
+  {id:'MCH201',code:'MCH 201',name:'Robotics & Automation',faculty:'eng',dept:'Engineering',level:200,credits:3,lecturer:'Dr. Adjei-Boateng',schedule:'Tue/Thu 14:00–16:00, Lab E-301 (Robotics)',assessment:'CA 30% · Lab 30% · Exam 40%',
+   description:'Introduction to robotics covering kinematics, actuators, sensors, control systems, and programming robot systems. Practical lab sessions with physical robots and simulation environments.',
+   outcomes:['Understand robot kinematics and dynamics','Program robots for task execution','Interface sensors and actuators','Design simple automation systems'],
+   prereqs:['EEE201','MCH101'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Robot Fundamentals',detail:'Robot types, applications, coordinate frames, transformations'},
+    {week:'Week 4–6',topic:'Kinematics',detail:'Forward/inverse kinematics, Denavit-Hartenberg notation'},
+    {week:'Week 7–9',topic:'Actuators & Sensors',detail:'DC motors, servo motors, encoders, vision systems'},
+    {week:'Week 10–12',topic:'Robot Control',detail:'PID control, trajectory planning, motion control'},
+    {week:'Week 13–15',topic:'Programming & Project',detail:'ROS basics, programming project, lab assessments'},
+   ],
+   tags:['Robotics','Automation','Mechatronics'],resources:['MCH201_Lab_Manual.pdf','Robotics_Kinematics_Notes.pdf','MCH201_Past_Exams.pdf']},
+
+  // BUSINESS
+  {id:'FIN201',code:'FIN 201',name:'Commercial Banking & Finance',faculty:'biz',dept:'Business School',level:200,credits:3,lecturer:'Dr. Sarfo E.',schedule:'Mon/Wed 10:00–12:00, Room B-204',assessment:'CA 40% · Exam 60%',
+   description:'Study of commercial banking operations, financial intermediation, credit analysis, bank regulation in Ghana, and the role of the Bank of Ghana in monetary policy.',
+   outcomes:['Understand commercial banking operations and products','Analyse financial statements for credit decisions','Apply Ghanaian banking regulations and compliance frameworks','Evaluate monetary policy impacts on banking'],
+   prereqs:['ACC101'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Banking System Overview',detail:'Types of banks in Ghana, Bank of Ghana, regulatory framework'},
+    {week:'Week 4–6',topic:'Bank Products & Services',detail:'Deposits, loans, trade finance, mobile money'},
+    {week:'Week 7–9',topic:'Credit Analysis',detail:'Creditworthiness assessment, loan structuring, NPLs'},
+    {week:'Week 10–12',topic:'Bank Regulation',detail:'Capital adequacy, CAMELS framework, AML/KYC'},
+    {week:'Week 13–15',topic:'Monetary Policy & Project',detail:'Inflation, interest rates, group banking project'},
+   ],
+   tags:['Banking','Finance','Business','Ghana'],resources:['FIN201_Course_Guide.pdf','Ghana_Banking_Act_2016.pdf','FIN201_Past_Questions.pdf','Bank_of_Ghana_Reference.pdf']},
+
+  {id:'MKT301',code:'MKT 301',name:'Digital Marketing',faculty:'biz',dept:'Business School',level:300,credits:3,lecturer:'Dr. Amankwah P.',schedule:'Tue/Thu 12:00–14:00, Room B-301',assessment:'CA 40% · Campaign Project 20% · Exam 40%',
+   description:'Modern digital marketing strategies covering SEO, social media marketing, content marketing, email campaigns, analytics and e-commerce in the Ghanaian and global context.',
+   outcomes:['Develop digital marketing strategies for businesses','Execute SEO, social media and content campaigns','Analyse digital marketing data using Google Analytics','Build and manage e-commerce marketing funnels'],
+   prereqs:['MKT101','MKT201'],
+   syllabus:[
+    {week:'Week 1–2',topic:'Digital Marketing Landscape',detail:'Online vs traditional, Ghana digital economy, trends'},
+    {week:'Week 3–4',topic:'SEO & Content Marketing',detail:'Keyword research, on-page SEO, content strategy'},
+    {week:'Week 5–7',topic:'Social Media Marketing',detail:'Facebook, Instagram, TikTok, LinkedIn for business'},
+    {week:'Week 8–9',topic:'Email & Mobile Marketing',detail:'Campaigns, automation, SMS marketing in Ghana'},
+    {week:'Week 10–11',topic:'Digital Analytics',detail:'Google Analytics, Facebook Insights, data-driven decisions'},
+    {week:'Week 12–13',topic:'E-Commerce & Ads',detail:'Google Ads, paid social, conversion optimisation'},
+    {week:'Week 14–15',topic:'Campaign Project',detail:'Live digital campaign: plan, execute, report results'},
+   ],
+   tags:['Marketing','Digital','Business','Social Media'],resources:['MKT301_Course_Outline.pdf','Digital_Marketing_Toolkit.pdf','Google_Analytics_Guide.pdf','MKT301_Past_Exams.pdf']},
+
+  // CREATIVE ARTS
+  {id:'FDT201',code:'FDT 201',name:'Garment Construction & Pattern Making',faculty:'arts',dept:'Creative Arts & Technology',level:200,credits:3,lecturer:'Mrs. Amponsah G.',schedule:'Mon/Wed/Fri 10:00–12:00, Studio CA-101',assessment:'CA 30% · Portfolio 40% · Exam 30%',
+   description:'Practical course in garment construction techniques, pattern making from scratch, fabric selection, sewing machine proficiency, and traditional Ghanaian textile integration.',
+   outcomes:['Draft patterns for various garment types','Construct garments using professional techniques','Select appropriate fabrics for different designs','Integrate Kente and other Ghanaian textiles into modern designs'],
+   prereqs:['FDT101'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Pattern Drafting Fundamentals',detail:'Body measurements, basic block patterns, dart manipulation'},
+    {week:'Week 4–6',topic:'Fabric Science',detail:'Fabric types, properties, selection for Ghanaian climate'},
+    {week:'Week 7–9',topic:'Construction Techniques',detail:'Seams, hems, zips, buttons, linings, finishing'},
+    {week:'Week 10–12',topic:'Traditional Textiles',detail:'Kente weaving principles, Kente integration in modern fashion'},
+    {week:'Week 13–15',topic:'Portfolio Project',detail:'Design and construct 2 complete garments for assessment'},
+   ],
+   tags:['Fashion','Creative','Design','Practical'],resources:['FDT201_Pattern_Templates.pdf','Fabric_Guide_Ghana.pdf','FDT201_Garment_Construction_Manual.pdf']},
+
+  // HEALTH SCIENCES
+  {id:'MLT301',code:'MLT 301',name:'Haematology & Blood Banking',faculty:'sci',dept:'Health Sciences',level:300,credits:3,lecturer:'Dr. Antwi M.',schedule:'Tue/Thu 8:00–10:00, Lab H-201',assessment:'CA 40% · Practical 30% · Exam 30%',
+   description:'Study of blood cell formation, function and disorders. Topics include haematological investigations, blood typing, blood banking procedures, and management of anaemias and coagulation disorders.',
+   outcomes:['Perform and interpret full blood count and differential','Carry out blood typing and compatibility testing','Identify haematological disorders from laboratory findings','Apply blood banking protocols and quality control'],
+   prereqs:['MLT201','BIO201'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Haematopoiesis',detail:'Blood cell formation, bone marrow, development stages'},
+    {week:'Week 4–6',topic:'Red Cell Disorders',detail:'Anaemias: iron deficiency, sickle cell, thalassaemia'},
+    {week:'Week 7–9',topic:'White Cell Disorders',detail:'Leukaemias, lymphomas, differential diagnosis'},
+    {week:'Week 10–11',topic:'Coagulation',detail:'Clotting factors, coagulation cascade, PT/APTT'},
+    {week:'Week 12–14',topic:'Blood Banking',detail:'ABO/Rh typing, crossmatching, transfusion reactions'},
+    {week:'Week 15',topic:'Quality Control',detail:'Lab QC, accreditation, reporting standards'},
+   ],
+   tags:['Medical','Lab','Health Sciences','Practical'],resources:['MLT301_Lab_Procedures.pdf','Haematology_Reference_Values_Ghana.pdf','Blood_Banking_Manual.pdf','MLT301_Past_Exams.pdf']},
+
+  // MATHS
+  {id:'MAT201',code:'MAT 201',name:'Calculus II',faculty:'sci',dept:'Applied Sciences',level:200,credits:3,lecturer:'Mr. Asante C.',schedule:'Mon/Wed/Fri 9:00–10:00, Room B-104',assessment:'CA 40% · Exam 60%',
+   description:'Continuation of Calculus I covering integration techniques, applications of integrals, sequences and series, multivariable calculus, and differential equations with engineering applications.',
+   outcomes:['Master integration techniques including substitution and integration by parts','Apply integrals to find areas, volumes and centroids','Understand sequences, series and convergence tests','Solve first-order differential equations'],
+   prereqs:['MAT101'],
+   syllabus:[
+    {week:'Week 1–3',topic:'Integration Techniques',detail:'Substitution, integration by parts, partial fractions, trig substitution'},
+    {week:'Week 4–5',topic:'Applications of Integration',detail:'Areas, volumes of revolution, arc length, surface area'},
+    {week:'Week 6–7',topic:'Improper Integrals',detail:'Infinite limits, discontinuous integrands, comparison tests'},
+    {week:'Week 8–9',topic:'Sequences & Series',detail:'Convergence tests, power series, Taylor & Maclaurin series'},
+    {week:'Week 10–12',topic:'Multivariable Calculus',detail:'Partial derivatives, multiple integrals, gradient vectors'},
+    {week:'Week 13–15',topic:'Differential Equations',detail:'First-order ODEs, separable equations, applications'},
+   ],
+   tags:['Mathematics','Core','Calculus'],resources:['MAT201_Formula_Sheet.pdf','MAT201_Lecture_Notes.pdf','Calculus_Practice_Problems.pdf','MAT201_Past_Questions_2020-2024.pdf']},
+];
+
+let currentFilter='all';
+let currentCourse=null;
+
+// ===== SECTION NAVIGATION =====
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(id==='courses-section')renderCourses();
+  if(id==='my-courses-section')renderMyCourses();
+  if(id==='location-section'){renderMap();loadPrivacyControls();}
+}
+
+// ===== FILTER =====
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderCourses();
+}
+
+// ===== RENDER COURSES =====
+function renderCourses(){
+  const search=(document.getElementById('course-search')?.value||'').toLowerCase();
+  const enroll=getEnrollments()[myKey]||{};
+  let filtered=COURSES.filter(c=>{
+    const matchSearch=!search||(c.name.toLowerCase().includes(search)||c.code.toLowerCase().includes(search)||c.lecturer.toLowerCase().includes(search)||c.tags.some(t=>t.toLowerCase().includes(search)));
+    const matchFilter=currentFilter==='all'||(currentFilter==='enrolled'&&enroll[c.id]==='enrolled')||(currentFilter==='interested'&&enroll[c.id]==='interested')||c.faculty===currentFilter;
+    return matchSearch&&matchFilter;
+  });
+  const grid=document.getElementById('courses-grid');
+  document.getElementById('course-count').textContent=filtered.length+' courses';
+  if(!filtered.length){grid.innerHTML='<div class="no-courses">No courses found. Try a different search or filter.</div>';return;}
+  grid.innerHTML=filtered.map(c=>{
+    const status=enroll[c.id]||'none';
+    return`<div class="course-card ${status} faculty-${c.faculty}" onclick="openCourse('${c.id}')">
+      <div class="course-card-info">
+        <span class="course-card-code">${c.code}</span>
+        <span class="badge bb badge-sm">Lv ${c.level} · ${c.credits} cr</span>
+      </div>
+      <div class="course-card-title">${c.name}</div>
+      <div class="course-card-meta">${c.lecturer}</div>
+      <div class="course-tags">${c.tags.slice(0,2).map(t=>`<span class="course-tag">${t}</span>`).join('')}</div>
+      <div class="course-card-desc">${c.description.slice(0,100)}…</div>
+      <div class="course-card-actions">
+        <button class="btn btn-o course-action-btn" onclick="event.stopPropagation();openCourse('${c.id}')">View Details</button>
+        <button class="btn ${status==='enrolled'?'btn-r':'btn-g'} course-action-btn" onclick="event.stopPropagation();toggleEnroll('${c.id}')">${status==='enrolled'?'Unenrol':'Enrol'}</button>
+        <button class="btn btn-o course-action-interest" title="${status==='interested'?'Remove interest':'Mark as interested'}" onclick="event.stopPropagation();toggleInterest('${c.id}')">${status==='interested'?'★':'☆'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== ENROLL / INTEREST =====
+function toggleEnroll(id){
+  const e=getEnrollments();if(!e[myKey])e[myKey]={};
+  const cur=e[myKey][id]||'none';
+  if(cur==='enrolled'){delete e[myKey][id];showNotif('Unenrolled from '+COURSES.find(c=>c.id===id)?.name);}
+  else{e[myKey][id]='enrolled';showNotif('✅ Enrolled in '+COURSES.find(c=>c.id===id)?.name);}
+  saveEnrollments(e);
+  renderCourses();
+  renderMyCourses();
+  if(currentCourse&&currentCourse.id===id){
+    updateModalEnrollStatus(id);
+    refreshModalButtons();
+  }
+}
+function toggleInterest(id){
+  const e=getEnrollments();if(!e[myKey])e[myKey]={};
+  const cur=e[myKey][id]||'none';
+  if(cur==='interested'){delete e[myKey][id];showNotif('Removed from interested list');}
+  else if(cur==='enrolled'){showNotif('Already enrolled — unenrol first to mark as interested');return;}
+  else{e[myKey][id]='interested';showNotif('★ Added to interested list');}
+  saveEnrollments(e);
+  renderCourses();
+  renderMyCourses();
+  if(currentCourse&&currentCourse.id===id){
+    updateModalEnrollStatus(id);
+    refreshModalButtons();
+  }
+}
+
+// ===== COURSE DETAIL MODAL =====
+function openCourse(id){
+  const c=COURSES.find(x=>x.id===id);if(!c)return;
+  currentCourse=c;
+  const fLabels={sci:'Applied Sciences',eng:'Engineering',biz:'Business School',arts:'Creative Arts'};
+  document.getElementById('modal-course-badge').innerHTML=`<span class="badge badge-${c.faculty}">${fLabels[c.faculty]||c.dept}</span>`;
+  document.getElementById('modal-course-name').textContent=c.code+' — '+c.name;
+  document.getElementById('modal-course-meta').textContent=c.lecturer+' · Level '+c.level+' · '+c.credits+' Credit Hours';
+  document.getElementById('modal-course-tags').innerHTML=c.tags.map(t=>`<span class="course-tag">${t}</span>`).join('');
+  document.getElementById('modal-description').textContent=c.description;
+  document.getElementById('modal-lecturer').textContent=c.lecturer;
+  document.getElementById('modal-credits').textContent=c.credits+' credit hours';
+  document.getElementById('modal-assessment').textContent=c.assessment;
+  document.getElementById('modal-schedule').textContent=c.schedule;
+  document.getElementById('modal-outcomes').innerHTML=c.outcomes.map(o=>`<div class="outcome-item"><span class="outcome-check">✓</span><span>${o}</span></div>`).join('');
+  // Syllabus
+  document.getElementById('modal-syllabus').innerHTML=c.syllabus.map(s=>`<div class="syllabus-week"><div class="syllabus-week-num">${s.week}</div><div class="syllabus-topic">${s.topic}</div><div class="syllabus-detail">${s.detail}</div></div>`).join('');
+  // Prerequisites
+  document.getElementById('modal-prereqs').innerHTML=c.prereqs.length?c.prereqs.map(p=>{
+    const pc=COURSES.find(x=>x.id===p);
+    const enrolled=((getEnrollments()[myKey]||{})[p]||'none')==='enrolled';
+    return`<div class="prereq-item">
+      <div><div class="prereq-title">${p}${pc?' — '+pc.name:''}</div><div class="prereq-detail">${pc?.dept||''}</div></div>
+      <span class="badge ${enrolled?'bg':'br'}">${enrolled?'✓ Complete':'Required'}</span>
+    </div>`;
+  }).join(''):`<div class="info-note text-center">✅ No prerequisites — open to eligible students</div>`;
+  // Resources
+  document.getElementById('modal-resources').innerHTML=c.resources.map(r=>{
+    let icon='📁', meta='File';
+    if(r.endsWith('.pdf')){icon='📄'; meta='PDF Document';}
+    else if(r.endsWith('.zip')){icon='📦'; meta='ZIP Archive';}
+    return `<div class="resource-item">
+      <div class="resource-content">
+        <span class="resource-icon">${icon}</span>
+        <div class="resource-text"><div class="resource-name">${r}</div><div class="resource-meta">${meta}</div></div>
+      </div>
+      <button class="btn btn-p resource-btn" onclick="downloadSyllabus('${r}','${c.code}')">Download</button>
+    </div>`;
+  }).join('');
+  updateModalEnrollStatus(id);
+  // Footer buttons
+  const e=getEnrollments();const status=(e[myKey]||{})[id]||'none';
+  document.getElementById('modal-footer-btns').innerHTML=`
+    <button class="btn btn-o flex-1" onclick="downloadSyllabus('${c.code}_Full_Syllabus.pdf','${c.code}')">📥 Download Syllabus</button>
+    <button class="btn ${status==='enrolled'?'btn-r':'btn-g'} flex-1" id="modal-enroll-btn" onclick="toggleEnroll('${id}')">${status==='enrolled'?'Unenrol':'Enrol in Course'}</button>
+    <button class="btn btn-o btn-xs" id="modal-interest-btn" onclick="toggleInterest('${id}')" title="Mark as interested">${status==='interested'?'★':'☆'}</button>
+  `;
+  refreshModalButtons();
+  switchModalTab('overview',document.querySelector('.modal-tab-btn'));
+  document.getElementById('course-modal').classList.add('open');
+}
+function refreshModalButtons(){
+  if(!currentCourse) return;
+  const status=(getEnrollments()[myKey]||{})[currentCourse.id]||'none';
+  const enrollBtn=document.getElementById('modal-enroll-btn');
+  const interestBtn=document.getElementById('modal-interest-btn');
+  if(enrollBtn){
+    enrollBtn.className='btn '+(status==='enrolled'?'btn-r':'btn-g');
+    enrollBtn.textContent=status==='enrolled'?'Unenrol':'Enrol in Course';
+  }
+  if(interestBtn){
+    interestBtn.textContent=status==='interested'?'★':'☆';
+    interestBtn.title=status==='interested'?'Remove interest':'Mark as interested';
+  }
+}
+function updateModalEnrollStatus(id){
+  const e=getEnrollments();const status=(e[myKey]||{})[id]||'none';
+  const box=document.getElementById('modal-enroll-status');
+  if(status==='enrolled')box.innerHTML='<div class="gc green status-box">✅ You are enrolled in this course. Track your progress in <strong>My Courses</strong>.</div>';
+  else if(status==='interested')box.innerHTML='<div class="gc gold status-box">★ You\'ve marked this course as interesting. Click Enrol to officially register.</div>';
+  else box.innerHTML='';
+}
+function switchModalTab(tab,btn){
+  ['overview','syllabus','prereqs','resources'].forEach(t=>{document.getElementById('tab-'+t).classList.toggle('active',t===tab)});
+  document.querySelectorAll('.modal-tab-btn').forEach(b=>{b.classList.toggle('active',b===btn)});
+}
+function downloadSyllabus(filename,code){
+  // Generate downloadable PDF-like text content
+  const c=currentCourse||COURSES.find(x=>x.code===code);
+  if(!c){showNotif('File ready — '+filename);return;}
+  const content=`KUMASI TECHNICAL UNIVERSITY (KsTU)
+COURSE DOCUMENT: ${c.code} — ${c.name}
+${'='.repeat(60)}
+
+DEPARTMENT: ${c.dept}
+LECTURER: ${c.lecturer}
+CREDIT HOURS: ${c.credits}
+LEVEL: ${c.level}
+ASSESSMENT: ${c.assessment}
+SCHEDULE: ${c.schedule}
+
+COURSE DESCRIPTION
+${'-'.repeat(40)}
+${c.description}
+
+LEARNING OUTCOMES
+${'-'.repeat(40)}
+${c.outcomes.map((o,i)=>`${i+1}. ${o}`).join('\n')}
+
+PREREQUISITES
+${'-'.repeat(40)}
+${c.prereqs.length?c.prereqs.join(', '):'None — open to eligible students'}
+
+WEEKLY SYLLABUS
+${'-'.repeat(40)}
+${c.syllabus.map(s=>`${s.week}: ${s.topic}\n   ${s.detail}`).join('\n\n')}
+
+RESOURCES & MATERIALS
+${'-'.repeat(40)}
+${c.resources.join('\n')}
+
+${'='.repeat(60)}
+Generated by CampusIQ — Powered by Papi
+Kumasi Technical University, 2026`;
+
+  const blob=new Blob([content],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename.replace('.pdf','.txt');
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  showNotif('📥 Downloaded: '+filename);
+}
+function closeModal(){
+  document.getElementById('course-modal').classList.remove('open');
+  currentCourse=null;
+}
+document.getElementById('course-modal').addEventListener('click',e=>{if(e.target===document.getElementById('course-modal'))closeModal()});
+
+// ===== MY COURSES =====
+function renderMyCourses(){
+  const e=getEnrollments()[myKey]||{};
+  const enrolled=COURSES.filter(c=>e[c.id]==='enrolled');
+  const interested=COURSES.filter(c=>e[c.id]==='interested');
+  const totalCredits=enrolled.reduce((s,c)=>s+c.credits,0);
+  const pct=Math.min(100,Math.round((enrolled.length/Math.max(1,COURSES.length))*100));
+  document.getElementById('enrolled-count').textContent=enrolled.length;
+  document.getElementById('interested-count').textContent=interested.length;
+  document.getElementById('credits-count').textContent=totalCredits;
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('ring-pct').textContent=pct+'%';
+  const circ=document.getElementById('prog-ring-circle');
+  const offset=314-(314*pct/100);
+  circ.style.strokeDashoffset=offset;
+  // Enrolled list
+  const el=document.getElementById('enrolled-list');
+  if(enrolled.length === 0){el.innerHTML='<div class="empty-state">No enrolled courses yet. <br><button class="btn btn-p small-btn" onclick="showSection(\'courses-section\',document.querySelector(\'.nav-tab\'))">Browse Courses →</button></div>';
+  }else{
+    el.innerHTML=enrolled.map(c=>`<div class="my-course-item">
+      <div class="course-item-icon icon-bg-sci"><span>📚</span></div>
+      <div class="course-item-info">
+        <div class="course-item-header">
+          <div>
+            <div class="course-item-title">${c.name}</div>
+            <div class="course-item-meta">${c.code} · ${c.lecturer} · ${c.credits} cr</div>
+          </div>
+          <span class="badge bg">✓ Enrolled</span>
+        </div>
+        <div class="course-item-note">📅 ${c.schedule}</div>
+      </div>
+      <div class="course-item-controls">
+        <button class="btn btn-o btn-xxs" onclick="openCourse('${c.id}')">Details</button>
+        <button class="btn btn-r btn-xxs" onclick="toggleEnroll('${c.id}');renderMyCourses()">Unenrol</button>
+      </div>
+    </div>`).join('');
+  }
+  // Deadlines
+  const dl=document.getElementById('deadlines-list');
+  if(enrolled.length === 0){dl.innerHTML='<div class="no-courses">Enrol in courses to see deadlines</div>';} 
+  else{
+    const deadlines=[
+      {name:'CPT 301 — Assignment 3',date:'Tomorrow, 11:59 PM',color:'#ef4444'},
+      {name:'MAT 201 — Mid-Sem Test',date:'June 18, 2026',color:'#f59e0b'},
+      {name:'CPT 305 — Project Proposal',date:'June 22, 2026',color:'#3b82f6'},
+      {name:'Final Exams Begin',date:'July 14, 2026',color:'#8b5cf6'},
+    ];
+    dl.innerHTML=deadlines.slice(0,3+enrolled.length).map(d=>{
+      const levelClass=d.level.replace(' ','-');
+      return `<div class="deadline-item"><div class="deadline-indicator ${levelClass}"></div><div class="deadline-info"><div class="deadline-name">${d.name}</div><div class="deadline-date ${levelClass}">${d.date}</div></div></div>`;
+    }).join('');
+  }
+  // Interested list
+  const il=document.getElementById('interested-list');
+  if(interested.length === 0){il.innerHTML='<div class="empty-state empty-state--small">No courses saved yet. Browse the catalogue and click ☆ on any course.</div>';}  
+  else{
+    il.innerHTML=interested.map(c=>`<div class="my-course-item interested">
+      <div class="course-item-icon icon-bg-interest"><span>★</span></div>
+      <div class="course-item-info">
+        <div class="course-item-title">${c.name}</div>
+        <div class="course-item-meta">${c.code} · ${c.lecturer} · Level ${c.level}</div>
+        <div class="course-item-note">Prerequisites: ${c.prereqs.length?c.prereqs.join(', '):'None'}</div>
+      </div>
+      <div class="course-item-controls">
+        <button class="btn btn-g btn-xxs" onclick="toggleEnroll('${c.id}');renderMyCourses()">Enrol</button>
+        <button class="btn btn-r btn-xxs" onclick="toggleInterest('${c.id}');renderMyCourses()">Remove</button>
+      </div>
+    </div>`).join('');
+  }
+}
+
+// ===== LOCATION / MAP =====
+let sharingActive=false;
+let myPosition={x:251,y:242};// Default: Applied Sciences
+let locationInterval=null;
+
+// Simulated students on campus (would be real-time in production)
+const simulatedStudents=[
+  {id:'s1',name:'Abena T.',prog:'Engineering',x:241,y:78,color:'#10b981',visible:true},
+  {id:'s2',name:'Kofi M.',prog:'Business School',x:105,y:235,color:'#10b981',visible:true},
+  {id:'s3',name:'Akua S.',prog:'Applied Sciences',x:280,y:242,color:'#10b981',visible:true},
+  {id:'s4',name:'Kwaku F.',prog:'Applied Sciences',x:230,y:220,color:'#10b981',visible:true},
+  {id:'s5',name:'Ama O.',prog:'Health Sciences',x:390,y:82,color:'#f59e0b',visible:true},// Library
+  {id:'l1',name:'Dr. Mensah K.',prog:'Lecturer',x:251,y:215,color:'#f59e0b',visible:true},
+];
+const buildingAreas=[
+  {name:'Applied Sciences',x:193,y:205,w:116,h:70,count:0},
+  {name:'Engineering',x:185,y:38,w:115,h:78,count:0},
+  {name:'Business School',x:50,y:200,w:110,h:70,count:0},
+  {name:'Library',x:345,y:48,w:90,h:65,count:0},
+  {name:'Cafeteria',x:348,y:208,w:88,h:58,count:0},
+  {name:'Sports Field',x:440,y:95,w:100,h:70,count:0},
+];
+
+function loadPrivacyControls(){
+  const privacy=getPrivacy();
+  ['share','name','exact','friends'].forEach(k=>{
+    const t=document.getElementById('toggle-'+k);
+    if(t){if(privacy[k])t.classList.add('on');else t.classList.remove('on');}
+  });
+  updateSharingStatus();
+  renderBusyAreas();
+  renderOnlineStudents();
+  if(privacy.share&&sharingActive){
+    activateSharing();
+  }
+}
+function togglePrivacy(key){
+  const p=getPrivacy();
+  p[key]=!p[key];
+  savePrivacy(p);
+  const t=document.getElementById('toggle-'+key);
+  if(t){if(p[key])t.classList.add('on');else t.classList.remove('on');}
+  if(key==='share'){
+    if(p.share){
+      activateSharing();
+    } else {
+      stopSharing();
+    }
+  } else {
+    updateSharingStatus();
+  }
+}
+function updateSharingStatus(){
+  const p=getPrivacy();
+  const badge=document.getElementById('sharing-badge');
+  const btn=document.getElementById('share-main-btn');
+  const txt=document.getElementById('sharing-status-text');
+  if(p.share&&sharingActive){
+    badge.textContent='● Sharing Live';badge.className='badge bg';
+    btn.textContent='✓ Sharing Active';btn.style.background='linear-gradient(135deg,#10b981,#06b6d4)';
+    txt.innerHTML=`📍 Your location is <strong class="status-live">LIVE</strong> on the campus map. ${p.name?'Your name is visible.':'Name hidden.'} ${p.exact?'Exact location shown.':'Building-level only.'} ${p.friends?'Visible to connected students only.':'Visible to all sharing students.'}`;
+  }else{
+    badge.textContent='Sharing Off';badge.className='badge bc';
+    btn.textContent='Enable Location Sharing';btn.style.background='linear-gradient(135deg,#10b981,#06b6d4)';
+    txt.innerHTML=`📍 Location sharing is <strong class="status-off">OFF</strong>. You are invisible on the campus map.`;
+  }
+}
+function activateSharing(){
+  const privacy=getPrivacy();privacy.share=true;savePrivacy(privacy);
+  document.getElementById('toggle-share').classList.add('on');
+  sharingActive=true;
+  // Simulate getting GPS or campus location
+  showNotif('📍 Location sharing enabled — you appear on the campus map');
+  updateSharingStatus();
+  renderMap();
+  renderOnlineStudents();
+  renderBusyAreas();
+  if(locationInterval){
+    clearInterval(locationInterval);
+    locationInterval=null;
+  }
+  // Simulate position drift
+  locationInterval=setInterval(()=>{
+    myPosition.x+=Math.round((Math.random()-0.5)*4);
+    myPosition.y+=Math.round((Math.random()-0.5)*4);
+    myPosition.x=Math.max(50,Math.min(520,myPosition.x));
+    myPosition.y=Math.max(40,Math.min(310,myPosition.y));
+    updateMyMarker();
+  },3000);
+}
+function stopSharing(){
+  sharingActive=false;
+  const privacy=getPrivacy();privacy.share=false;savePrivacy(privacy);
+  document.getElementById('toggle-share').classList.remove('on');
+  const m=document.getElementById('my-marker');if(m)m.style.display='none';
+  if(locationInterval){clearInterval(locationInterval);locationInterval=null;}
+  showNotif('Location sharing stopped. You are now invisible.');
+  updateSharingStatus();
+  renderMap();
+  renderOnlineStudents();
+  renderBusyAreas();
+}
+function updateMyMarker(){
+  const m=document.getElementById('my-marker');
+  if(!m)return;
+  m.setAttribute('transform',`translate(${myPosition.x},${myPosition.y})`);
+  m.style.display='block';
+}
+function renderMap(){
+  const layer=document.getElementById('students-layer');
+  if(!layer)return;
+  const visibleStudents=simulatedStudents.filter(s=>s.visible);
+  layer.innerHTML=visibleStudents.map(s=>`
+    <g transform="translate(${s.x},${s.y})" class="student-marker" onclick="showStudentTooltip(event,'${s.name}','${s.prog}')">
+      <circle r="5" fill="${s.color}" stroke="#fff" stroke-width="1.5"/>
+      <circle r="10" fill="${s.color}" opacity="0.2">
+        <animate attributeName="r" values="5;14;5" dur="${1.5+Math.random()}s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0;0.4" dur="${1.5+Math.random()}s" repeatCount="indefinite"/>
+      </circle>
+      <text text-anchor="middle" fill="${s.color}" font-size="7.5" font-family="Exo 2" dy="17" font-weight="500">${s.name.split(' ')[0]}</text>
+    </g>`).join('');
+  // Update live count
+  const total=visibleStudents.length+(sharingActive?1:0);
+  document.getElementById('map-live-badge').textContent=total+' students visible';
+  document.getElementById('live-count').textContent=total+' students';
+  if(sharingActive)updateMyMarker();
+}
+function showStudentTooltip(e,name,prog){
+  const t=document.getElementById('map-tooltip');
+  t.style.display='block';
+  t.innerHTML=`<strong>${name}</strong><br><span class="text-muted">${prog}</span><br><span class="tooltip-status tooltip-status-small">● Online · On campus</span>`;
+  t.style.left=(e.offsetX+10)+'px';t.style.top=(e.offsetY-40)+'px';
+  setTimeout(()=>t.style.display='none',2500);
+}
+function renderOnlineStudents(){
+  const list=document.getElementById('online-students-list');
+  list.innerHTML=simulatedStudents.map(s=>{
+    let dotClass='default';
+    if(s.color==='#10b981') dotClass='green';
+    else if(s.color==='#f59e0b') dotClass='gold';
+    return `<div class="online-student-item">
+      <div class="online-student-dot ${dotClass}"></div>
+      <div class="online-student-text"><div>${s.name}</div><div class="text-muted">${s.prog}</div></div>
+      <span class="online-status">Live</span>
+    </div>`;
+  }).join('');
+}
+function renderBusyAreas(){
+  const areas=[
+    {name:'Applied Sciences',students:4,level:'busy',color:'#ef4444'},
+    {name:'Library',students:8,level:'very busy',color:'#f59e0b'},
+    {name:'Engineering Block',students:3,level:'moderate',color:'#3b82f6'},
+    {name:'Cafeteria',students:12,level:'very busy',color:'#ef4444'},
+    {name:'Business School',students:2,level:'quiet',color:'#10b981'},
+    {name:'Sports Field',students:6,level:'busy',color:'#f59e0b'},
+  ];
+  document.getElementById('busy-areas').innerHTML=areas.map(a=>`<div class="busy-area-item">
+    <span class="busy-text">${a.name}</span>
+    <div class="busy-meta"><span class="text-muted">${a.students} students</span><span class="busy-badge ${a.level.replace(' ','-')}">${a.level}</span></div>
+  </div>`).join('');
+}
+
+// ===== NOTIFICATIONS =====
+function showNotif(msg,duration=3000){
+  const n=document.getElementById('notif-popup');
+  n.textContent=msg;n.style.display='block';
+  setTimeout(()=>{n.style.display='none'},duration);
+}
+
+// ===== INIT =====
+renderCourses();
+loadPrivacyControls();
+</script>
+</body>
+</html>
